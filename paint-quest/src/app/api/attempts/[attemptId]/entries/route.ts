@@ -4,12 +4,13 @@ import type { Json } from '@/lib/types/database.types'
 
 export async function POST(
     request: Request,
-    { params }: { params: { attemptId: string } }
+    { params }: { params: Promise<{ attemptId: string }> }
 ) {
     try {
         const body = await request.json()
         const entryType = typeof body.entryType === 'string' ? body.entryType.trim() : ''
         const content = body.content as Json
+        const { attemptId } = await params
 
         if (!entryType) {
             return NextResponse.json(
@@ -26,7 +27,7 @@ export async function POST(
         }
 
         await addAttemptEntry({
-            attemptId: params.attemptId,
+            attemptId,
             entryType,
             content,
         })

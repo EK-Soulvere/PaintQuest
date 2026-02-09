@@ -19,7 +19,7 @@ describe('POST /api/attempts/[attemptId]/events', () => {
             body: JSON.stringify({ eventType: 'BAD', payload: null }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'abc' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'abc' }) })
         const body = await response.json()
 
         expect(response.status).toBe(400)
@@ -34,7 +34,7 @@ describe('POST /api/attempts/[attemptId]/events', () => {
             body: JSON.stringify({ eventType: 'COMPLETED', payload: null }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'attempt-1' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'attempt-1' }) })
         const body = await response.json()
 
         expect(response.status).toBe(200)
@@ -55,7 +55,7 @@ describe('POST /api/attempts/[attemptId]/events', () => {
             body: JSON.stringify({ eventType: 'ABANDONED', payload: null }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'attempt-2' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'attempt-2' }) })
         const body = await response.json()
 
         expect(response.status).toBe(400)

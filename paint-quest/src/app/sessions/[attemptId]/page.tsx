@@ -1,13 +1,20 @@
 import { getAttemptDetails } from '@/lib/attempts/server'
+import { notFound } from 'next/navigation'
 import EventForm from './EventForm'
 import EntryForm from './EntryForm'
 
 export default async function AttemptDetailPage({
     params,
 }: {
-    params: { attemptId: string }
+    params: Promise<{ attemptId: string }>
 }) {
-    const details = await getAttemptDetails(params.attemptId)
+    const { attemptId } = await params
+    let details
+    try {
+        details = await getAttemptDetails(attemptId)
+    } catch {
+        notFound()
+    }
 
     return (
         <div className="min-h-screen p-8">

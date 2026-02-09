@@ -12,12 +12,13 @@ const allowedEventTypes: EventType[] = [
 
 export async function POST(
     request: Request,
-    { params }: { params: { attemptId: string } }
+    { params }: { params: Promise<{ attemptId: string }> }
 ) {
     try {
         const body = await request.json()
         const eventType = body.eventType as EventType
         const payload = (body.payload ?? null) as Json | null
+        const { attemptId } = await params
 
         if (!allowedEventTypes.includes(eventType)) {
             return NextResponse.json(
@@ -27,7 +28,7 @@ export async function POST(
         }
 
         await addProgressEvent({
-            attemptId: params.attemptId,
+            attemptId,
             eventType,
             payload,
         })

@@ -19,7 +19,7 @@ describe('POST /api/attempts/[attemptId]/entries', () => {
             body: JSON.stringify({ entryType: '', content: { text: 'hi' } }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'attempt-1' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'attempt-1' }) })
         const body = await response.json()
 
         expect(response.status).toBe(400)
@@ -34,7 +34,7 @@ describe('POST /api/attempts/[attemptId]/entries', () => {
             body: JSON.stringify({ entryType: 'note' }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'attempt-1' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'attempt-1' }) })
         const body = await response.json()
 
         expect(response.status).toBe(400)
@@ -52,7 +52,7 @@ describe('POST /api/attempts/[attemptId]/entries', () => {
             }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'attempt-2' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'attempt-2' }) })
         const body = await response.json()
 
         expect(response.status).toBe(200)
@@ -76,7 +76,7 @@ describe('POST /api/attempts/[attemptId]/entries', () => {
             }),
         })
 
-        const response = await POST(request, { params: { attemptId: 'attempt-3' } })
+        const response = await POST(request, { params: Promise.resolve({ attemptId: 'attempt-3' }) })
         const body = await response.json()
 
         expect(response.status).toBe(400)
