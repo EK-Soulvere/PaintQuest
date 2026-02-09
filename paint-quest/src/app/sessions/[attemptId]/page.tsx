@@ -2,6 +2,7 @@ import { getAttemptDetails } from '@/lib/attempts/server'
 import { notFound } from 'next/navigation'
 import EventForm from './EventForm'
 import EntryForm from './EntryForm'
+import Link from 'next/link'
 
 export default async function AttemptDetailPage({
     params,
@@ -20,6 +21,12 @@ export default async function AttemptDetailPage({
         <div className="min-h-screen p-8">
             <div className="max-w-4xl mx-auto space-y-8">
                 <div>
+                    <Link
+                        href="/sessions"
+                        className="inline-block mb-4 text-sm text-[var(--color-secondary)] hover:underline"
+                    >
+                        ← Back to Sessions
+                    </Link>
                     <h1 className="text-4xl font-bold text-[var(--color-primary)] mb-2">
                         Attempt #{details.attempt.id.slice(0, 8)}
                     </h1>

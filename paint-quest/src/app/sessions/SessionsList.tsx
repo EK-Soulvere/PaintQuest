@@ -79,7 +79,7 @@ export default function SessionsList({ initialAttempts }: SessionsListProps) {
                         <Link
                             key={attempt.id}
                             href={`/sessions/${attempt.id}`}
-                            className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] transition-colors"
+                            className="block p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] transition-colors"
                         >
                             <div className="flex justify-between items-start">
                                 <div>
