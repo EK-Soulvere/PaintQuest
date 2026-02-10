@@ -102,6 +102,14 @@ export async function addProgressEvent(params: {
         throw new Error(`Action not allowed: ${params.eventType}`)
     }
 
+    if (params.eventType === 'ATTEMPT_STARTED') {
+        const activeIds = await getActiveAttemptIdsForUser(supabase, user.id)
+        const otherActive = activeIds.filter((id) => id !== params.attemptId)
+        if (otherActive.length > 0) {
+            throw new Error('Another attempt is already in progress')
+        }
+    }
+
     const { error: insertError } = await supabase.from('progress_event').insert([
         {
             attempt_id: params.attemptId,
@@ -113,6 +121,48 @@ export async function addProgressEvent(params: {
     if (insertError) {
         throw new Error('Failed to record event')
     }
+}
+
+export async function getActiveAttemptIdsForUser(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    userId: string
+) {
+    const { data: attempts, error } = await supabase
+        .from('attempt')
+        .select('id,created_at,task_id')
+        .eq('user_id', userId)
+
+    if (error || !attempts) {
+        return []
+    }
+
+    const attemptIds = attempts.map((attempt) => attempt.id)
+    if (attemptIds.length === 0) {
+        return []
+    }
+
+    const { data: events } = await supabase
+        .from('progress_event')
+        .select('attempt_id,event_type,timestamp')
+        .in('attempt_id', attemptIds)
+        .order('timestamp', { ascending: true })
+
+    const eventsByAttempt = new Map<string, { event_type: string; timestamp: string }[]>()
+    for (const event of events || []) {
+        const list = eventsByAttempt.get(event.attempt_id) || []
+        list.push({ event_type: event.event_type, timestamp: event.timestamp })
+        eventsByAttempt.set(event.attempt_id, list)
+    }
+
+    const active: string[] = []
+    for (const attempt of attempts) {
+        const derived = deriveAttemptState(eventsByAttempt.get(attempt.id) || [])
+        if (derived.derivedState === 'IN_PROGRESS') {
+            active.push(attempt.id)
+        }
+    }
+
+    return active
 }
 
 export async function addAttemptEntry(params: {

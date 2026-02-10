@@ -5,11 +5,7 @@ import { getActiveAttemptIdsForUser } from '@/lib/attempts/server'
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const taskId = body.taskId as string
-
-        if (!taskId) {
-            return NextResponse.json({ error: 'taskId is required' }, { status: 400 })
-        }
+        const autoStart = Boolean(body.autoStart)
 
         const supabase = await createClient()
         const {
@@ -30,15 +26,32 @@ export async function POST(request: Request) {
 
         const { data: attempt, error } = await supabase
             .from('attempt')
-            .insert([{ user_id: user.id, task_id: taskId }])
+            .insert([{ user_id: user.id }])
             .select()
             .single()
 
         if (error || !attempt) {
-            return NextResponse.json({ error: 'Failed to create quest' }, { status: 400 })
+            return NextResponse.json({ error: 'Failed to create attempt' }, { status: 400 })
         }
 
-        return NextResponse.json({ attempt })
+        if (autoStart) {
+            const { error: eventError } = await supabase.from('progress_event').insert([
+                {
+                    attempt_id: attempt.id,
+                    event_type: 'ATTEMPT_STARTED',
+                    payload: null,
+                },
+            ])
+
+            if (eventError) {
+                return NextResponse.json({ error: 'Failed to start attempt' }, { status: 400 })
+            }
+        }
+
+        return NextResponse.json({
+            attempt,
+            derivedState: autoStart ? 'IN_PROGRESS' : 'NONE',
+        })
     } catch (error) {
         return NextResponse.json(
             { error: error instanceof Error ? error.message : 'Unknown error' },

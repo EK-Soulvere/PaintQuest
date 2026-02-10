@@ -1,7 +1,6 @@
 import { getAttemptDetails } from '@/lib/attempts/server'
 import { notFound } from 'next/navigation'
 import EventForm from './EventForm'
-import EntryForm from './EntryForm'
 import Link from 'next/link'
 import StartAttemptButton from './StartAttemptButton'
 
@@ -69,19 +68,11 @@ export default async function AttemptDetailPage({
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
-                        <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
-                            Record Event
-                        </h2>
-                        <EventForm attemptId={details.attempt.id} />
-                    </div>
-                    <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
-                        <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
-                            Add Entry
-                        </h2>
-                        <EntryForm attemptId={details.attempt.id} />
-                    </div>
+                <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
+                    <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
+                        Record Event
+                    </h2>
+                    <EventForm attemptId={details.attempt.id} />
                 </div>
 
                 <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
@@ -118,33 +109,6 @@ export default async function AttemptDetailPage({
                     )}
                 </div>
 
-                <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
-                    <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
-                        Entries
-                    </h2>
-                    {details.entries.length === 0 ? (
-                        <p className="text-[var(--color-text)] opacity-70">No entries yet.</p>
-                    ) : (
-                        <div className="space-y-3">
-                            {details.entries.map((entry) => (
-                                <div
-                                    key={entry.entry_id}
-                                    className="p-3 border border-[var(--color-border)] rounded-md"
-                                >
-                                    <p className="text-sm font-medium text-[var(--color-primary)]">
-                                        {entry.entry_type}
-                                    </p>
-                                    <p className="text-xs text-[var(--color-text)] opacity-60">
-                                        {new Date(entry.created_at).toLocaleString()}
-                                    </p>
-                                    <pre className="mt-2 text-xs text-[var(--color-text)] opacity-80 whitespace-pre-wrap">
-                                        {JSON.stringify(entry.content, null, 2)}
-                                    </pre>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
             </div>
         </div>
     )

@@ -58,11 +58,17 @@ export default function TasksList({ initialTasks }: TasksListProps) {
         return data.task as Task
     }
 
-    const handleFieldChange = async (
+    const handleFieldChange = (
         taskId: string,
         field: keyof Task,
         value: Task[keyof Task]
     ) => {
+        setTasks((prev) =>
+            prev.map((task) => (task.id === taskId ? { ...task, [field]: value } : task))
+        )
+    }
+
+    const handleFieldBlur = async (taskId: string, field: keyof Task, value: Task[keyof Task]) => {
         try {
             const updated = await updateTask(taskId, { [field]: value } as Partial<Task>)
             setTasks((prev) => prev.map((task) => (task.id === taskId ? updated : task)))
@@ -114,16 +120,25 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                             className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg space-y-4"
                         >
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <input
-                                    value={task.title}
-                                    onChange={(e) => handleFieldChange(task.id, 'title', e.target.value)}
-                                    className="w-full md:flex-1 px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                />
+                                <div className="w-full md:flex-1">
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Title
+                                    </label>
+                                    <input
+                                        value={task.title}
+                                        onChange={(e) => handleFieldChange(task.id, 'title', e.target.value)}
+                                        onBlur={(e) => handleFieldBlur(task.id, 'title', e.target.value)}
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                    />
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <label className="text-xs text-[var(--color-text)] opacity-70">Status</label>
                                     <select
                                         value={task.status}
-                                        onChange={(e) => handleFieldChange(task.id, 'status', e.target.value)}
+                                        onChange={(e) => {
+                                            handleFieldChange(task.id, 'status', e.target.value)
+                                            handleFieldBlur(task.id, 'status', e.target.value)
+                                        }}
                                         className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
                                     >
                                         {statusOptions.map((status) => (
@@ -136,77 +151,137 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                <input
-                                    value={task.game || ''}
-                                    onChange={(e) => handleFieldChange(task.id, 'game', e.target.value)}
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="Game (optional)"
-                                />
-                                <input
-                                    value={task.mfg || ''}
-                                    onChange={(e) => handleFieldChange(task.id, 'mfg', e.target.value)}
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="MFG (optional)"
-                                />
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Game
+                                    </label>
+                                    <input
+                                        value={task.game || ''}
+                                        onChange={(e) => handleFieldChange(task.id, 'game', e.target.value)}
+                                        onBlur={(e) => handleFieldBlur(task.id, 'game', e.target.value)}
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Game (optional)"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        MFG
+                                    </label>
+                                    <input
+                                        value={task.mfg || ''}
+                                        onChange={(e) => handleFieldChange(task.id, 'mfg', e.target.value)}
+                                        onBlur={(e) => handleFieldBlur(task.id, 'mfg', e.target.value)}
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="MFG (optional)"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid md:grid-cols-3 gap-4">
-                                <input
-                                    type="number"
-                                    value={task.estimated_minutes_min ?? ''}
-                                    onChange={(e) =>
-                                        handleFieldChange(
-                                            task.id,
-                                            'estimated_minutes_min',
-                                            e.target.value ? Number(e.target.value) : null
-                                        )
-                                    }
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="Min minutes"
-                                />
-                                <input
-                                    type="number"
-                                    value={task.estimated_minutes_max ?? ''}
-                                    onChange={(e) =>
-                                        handleFieldChange(
-                                            task.id,
-                                            'estimated_minutes_max',
-                                            e.target.value ? Number(e.target.value) : null
-                                        )
-                                    }
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="Max minutes"
-                                />
-                                <input
-                                    type="number"
-                                    min={1}
-                                    max={5}
-                                    value={task.priority}
-                                    onChange={(e) =>
-                                        handleFieldChange(task.id, 'priority', Number(e.target.value))
-                                    }
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="Priority"
-                                />
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Min Minutes
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={task.estimated_minutes_min ?? ''}
+                                        onChange={(e) =>
+                                            handleFieldChange(
+                                                task.id,
+                                                'estimated_minutes_min',
+                                                e.target.value ? Number(e.target.value) : null
+                                            )
+                                        }
+                                        onBlur={(e) =>
+                                            handleFieldBlur(
+                                                task.id,
+                                                'estimated_minutes_min',
+                                                e.target.value ? Number(e.target.value) : null
+                                            )
+                                        }
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Min minutes"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Max Minutes
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={task.estimated_minutes_max ?? ''}
+                                        onChange={(e) =>
+                                            handleFieldChange(
+                                                task.id,
+                                                'estimated_minutes_max',
+                                                e.target.value ? Number(e.target.value) : null
+                                            )
+                                        }
+                                        onBlur={(e) =>
+                                            handleFieldBlur(
+                                                task.id,
+                                                'estimated_minutes_max',
+                                                e.target.value ? Number(e.target.value) : null
+                                            )
+                                        }
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Max minutes"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Priority (1-5)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        max={5}
+                                        value={task.priority}
+                                        onChange={(e) =>
+                                            handleFieldChange(task.id, 'priority', Number(e.target.value))
+                                        }
+                                        onBlur={(e) =>
+                                            handleFieldBlur(task.id, 'priority', Number(e.target.value))
+                                        }
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Priority"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                <input
-                                    value={Array.isArray(task.required_tools_tags) ? task.required_tools_tags.join(', ') : ''}
-                                    onChange={(e) =>
-                                        handleFieldChange(task.id, 'required_tools_tags', e.target.value)
-                                    }
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="Required tools tags (comma separated)"
-                                />
-                                <input
-                                    value={Array.isArray(task.skills_tags) ? task.skills_tags.join(', ') : ''}
-                                    onChange={(e) =>
-                                        handleFieldChange(task.id, 'skills_tags', e.target.value)
-                                    }
-                                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                    placeholder="Skills tags (comma separated)"
-                                />
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Required Tools Tags
+                                    </label>
+                                    <input
+                                        value={Array.isArray(task.required_tools_tags) ? task.required_tools_tags.join(', ') : ''}
+                                        onChange={(e) =>
+                                            handleFieldChange(task.id, 'required_tools_tags', e.target.value)
+                                        }
+                                        onBlur={(e) =>
+                                            handleFieldBlur(task.id, 'required_tools_tags', e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Required tools tags (comma separated)"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Skills Tags
+                                    </label>
+                                    <input
+                                        value={Array.isArray(task.skills_tags) ? task.skills_tags.join(', ') : ''}
+                                        onChange={(e) =>
+                                            handleFieldChange(task.id, 'skills_tags', e.target.value)
+                                        }
+                                        onBlur={(e) =>
+                                            handleFieldBlur(task.id, 'skills_tags', e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Skills tags (comma separated)"
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex items-center justify-between">

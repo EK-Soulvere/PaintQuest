@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { Database } from '@/lib/types/database.types'
 import type { AttemptState } from '@/lib/fsm/deriveAttemptState'
@@ -18,40 +17,25 @@ export default function SessionsList({ initialAttempts }: SessionsListProps) {
     const [attempts, setAttempts] = useState<AttemptWithState[]>(initialAttempts)
     const [creating, setCreating] = useState(false)
     const router = useRouter()
-    const supabase = createClient()
 
     const createAttempt = async () => {
         setCreating(true)
         try {
-            const {
-                data: { user },
-            } = await supabase.auth.getUser()
-            if (!user) return
-
-            const { data, error } = await supabase
-                .from('attempt')
-                .insert([{ user_id: user.id }])
-                .select()
-                .single()
-
-            if (error) throw error
-
-            if (data) {
-                // Create initial ATTEMPT_STARTED event
-                await supabase.from('progress_event').insert([
-                    {
-                        attempt_id: data.id,
-                        event_type: 'ATTEMPT_STARTED',
-                        payload: null,
-                    },
-                ])
-
-                setAttempts([{ ...data, derivedState: 'IN_PROGRESS' }, ...attempts])
-                router.refresh()
+            const response = await fetch('/api/attempts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ autoStart: true }),
+            })
+            const data = await response.json()
+            if (!response.ok) {
+                throw new Error(data?.error || 'Failed to create attempt')
             }
+
+            setAttempts([{ ...data.attempt, derivedState: data.derivedState }, ...attempts])
+            router.refresh()
         } catch (error) {
             console.error('Error creating attempt:', error)
-            alert('Failed to create attempt')
+            alert(error instanceof Error ? error.message : 'Failed to create attempt')
         } finally {
             setCreating(false)
         }
