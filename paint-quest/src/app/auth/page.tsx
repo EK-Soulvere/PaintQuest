@@ -32,7 +32,7 @@ export default function AuthPage() {
                     password,
                 })
                 if (error) throw error
-                router.push('/sessions')
+                router.push('/')
                 router.refresh()
             }
         } catch (err) {

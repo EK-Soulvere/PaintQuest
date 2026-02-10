@@ -103,6 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_task_status ON task(status);
 CREATE INDEX IF NOT EXISTS idx_task_priority ON task(priority DESC);
 CREATE INDEX IF NOT EXISTS idx_recommendation_config_user_id ON recommendation_config(user_id);
 CREATE INDEX IF NOT EXISTS idx_profile_user_id ON profile(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profile_user_id_unique ON profile(user_id);
 CREATE INDEX IF NOT EXISTS idx_arsenal_item_user_id ON arsenal_item(user_id);
 CREATE INDEX IF NOT EXISTS idx_arsenal_item_available ON arsenal_item(available);
 

@@ -255,7 +255,13 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                                         Required Tools Tags
                                     </label>
                                     <input
-                                        value={Array.isArray(task.required_tools_tags) ? task.required_tools_tags.join(', ') : ''}
+                                        value={
+                                            Array.isArray(task.required_tools_tags)
+                                                ? task.required_tools_tags.join(', ')
+                                                : typeof task.required_tools_tags === 'string'
+                                                    ? task.required_tools_tags
+                                                    : ''
+                                        }
                                         onChange={(e) =>
                                             handleFieldChange(task.id, 'required_tools_tags', e.target.value)
                                         }
@@ -271,7 +277,13 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                                         Skills Tags
                                     </label>
                                     <input
-                                        value={Array.isArray(task.skills_tags) ? task.skills_tags.join(', ') : ''}
+                                        value={
+                                            Array.isArray(task.skills_tags)
+                                                ? task.skills_tags.join(', ')
+                                                : typeof task.skills_tags === 'string'
+                                                    ? task.skills_tags
+                                                    : ''
+                                        }
                                         onChange={(e) =>
                                             handleFieldChange(task.id, 'skills_tags', e.target.value)
                                         }

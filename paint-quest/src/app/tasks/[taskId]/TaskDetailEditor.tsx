@@ -146,7 +146,9 @@ export default function TaskDetailEditor({ task }: TaskDetailEditorProps) {
                         value={
                             Array.isArray(draft.required_tools_tags)
                                 ? draft.required_tools_tags.join(', ')
-                                : ''
+                                : typeof draft.required_tools_tags === 'string'
+                                    ? draft.required_tools_tags
+                                    : ''
                         }
                         onChange={(e) => updateDraft('required_tools_tags', e.target.value)}
                         className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
@@ -156,7 +158,11 @@ export default function TaskDetailEditor({ task }: TaskDetailEditorProps) {
                     <label className="block text-sm font-medium mb-2">Skills Tags</label>
                     <input
                         value={
-                            Array.isArray(draft.skills_tags) ? draft.skills_tags.join(', ') : ''
+                            Array.isArray(draft.skills_tags)
+                                ? draft.skills_tags.join(', ')
+                                : typeof draft.skills_tags === 'string'
+                                    ? draft.skills_tags
+                                    : ''
                         }
                         onChange={(e) => updateDraft('skills_tags', e.target.value)}
                         className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"

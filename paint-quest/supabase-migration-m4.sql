@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS profile (
 );
 
 CREATE INDEX IF NOT EXISTS idx_profile_user_id ON profile(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profile_user_id_unique ON profile(user_id);
 
 ALTER TABLE profile ENABLE ROW LEVEL SECURITY;
 
