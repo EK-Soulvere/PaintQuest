@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import type { Database } from '@/lib/types/database.types'
-import { TOOL_TAGS } from '@/lib/constants/tags'
+import { TOOL_TAGS, PAINT_BRAND_TAGS, PAINT_MEDIUM_TAGS } from '@/lib/constants/tags'
 import TagMultiSelect from '@/components/TagMultiSelect'
 
 type ArsenalItem = Database['public']['Tables']['arsenal_item']['Row']
 
-const categories = ['paint', 'tool', 'brush', 'other'] as const
+const categories = ['paint', 'tool', 'other'] as const
 
 interface ArsenalListProps {
     initialItems: ArsenalItem[]
@@ -110,7 +110,7 @@ export default function ArsenalList({ initialItems }: ArsenalListProps) {
                             <div className="grid md:grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
-                                        Name
+                                        {item.category === 'paint' ? 'Color' : 'Name'}
                                     </label>
                                     <input
                                         value={item.name}
@@ -156,21 +156,46 @@ export default function ArsenalList({ initialItems }: ArsenalListProps) {
                                     </select>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
-                                    Tags (comma separated)
-                                </label>
-                                {item.category === 'tool' ? (
+                            {item.category === 'tool' ? (
+                                <TagMultiSelect
+                                    label="Tool Tags"
+                                    options={TOOL_TAGS as unknown as string[]}
+                                    value={Array.isArray(item.tags) ? item.tags.map(String) : []}
+                                    onChange={(next) => {
+                                        handleFieldChange(item.id, 'tags', next)
+                                        handleFieldBlur(item.id, 'tags', next)
+                                    }}
+                                />
+                            ) : null}
+
+                            {item.category === 'paint' ? (
+                                <div className="grid md:grid-cols-2 gap-4">
                                     <TagMultiSelect
-                                        label="Tool Tags"
-                                        options={TOOL_TAGS as unknown as string[]}
+                                        label="Paint Brand Tags"
+                                        options={PAINT_BRAND_TAGS as unknown as string[]}
                                         value={Array.isArray(item.tags) ? item.tags.map(String) : []}
                                         onChange={(next) => {
                                             handleFieldChange(item.id, 'tags', next)
                                             handleFieldBlur(item.id, 'tags', next)
                                         }}
                                     />
-                                ) : (
+                                    <TagMultiSelect
+                                        label="Paint Medium"
+                                        options={PAINT_MEDIUM_TAGS as unknown as string[]}
+                                        value={Array.isArray(item.tags) ? item.tags.map(String) : []}
+                                        onChange={(next) => {
+                                            handleFieldChange(item.id, 'tags', next)
+                                            handleFieldBlur(item.id, 'tags', next)
+                                        }}
+                                    />
+                                </div>
+                            ) : null}
+
+                            {item.category === 'other' ? (
+                                <div>
+                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                                        Tags (comma separated)
+                                    </label>
                                     <input
                                         value={Array.isArray(item.tags) ? item.tags.join(', ') : ''}
                                         onChange={(e) => handleFieldChange(item.id, 'tags', e.target.value)}
@@ -178,8 +203,8 @@ export default function ArsenalList({ initialItems }: ArsenalListProps) {
                                         className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
                                         placeholder="Add tags (comma separated)"
                                     />
-                                )}
-                            </div>
+                                </div>
+                            ) : null}
                             <button
                                 onClick={() => deleteItem(item.id)}
                                 className="text-sm text-red-400 hover:underline"

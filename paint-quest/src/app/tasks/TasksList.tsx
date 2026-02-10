@@ -193,7 +193,7 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                                     }
                                 </span>
                                 <span>
-                                    Low priority (<=2):{' '}
+                                    Low priority ({'<='}2):{' '}
                                     {tasks.filter((task) => task.priority <= 2).length}
                                 </span>
                             </div>

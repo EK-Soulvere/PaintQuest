@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         const { data: tasks, error: tasksError } = await supabase
             .from('task')
             .select('*')
-            .neq('status', 'archived')
+            .in('status', ['backlog', 'active', 'someday'])
 
         if (tasksError) {
             return NextResponse.json({ error: 'Failed to load tasks' }, { status: 400 })

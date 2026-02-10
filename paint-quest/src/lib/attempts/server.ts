@@ -121,6 +121,22 @@ export async function addProgressEvent(params: {
     if (insertError) {
         throw new Error('Failed to record event')
     }
+
+    if (params.eventType === 'COMPLETED' || params.eventType === 'ABANDONED') {
+        const { data: attempt } = await supabase
+            .from('attempt')
+            .select('task_id')
+            .eq('id', params.attemptId)
+            .single()
+
+        if (attempt?.task_id) {
+            const nextStatus = params.eventType === 'COMPLETED' ? 'done' : 'archived'
+            await supabase
+                .from('task')
+                .update({ status: nextStatus, updated_at: new Date().toISOString() })
+                .eq('id', attempt.task_id)
+        }
+    }
 }
 
 export async function getActiveAttemptIdsForUser(
