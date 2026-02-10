@@ -78,6 +78,97 @@ export interface Database {
                     created_at?: string
                 }
             }
+            task: {
+                Row: {
+                    id: string
+                    user_id: string
+                    title: string
+                    game: string | null
+                    mfg: string | null
+                    estimated_minutes_min: number | null
+                    estimated_minutes_max: number | null
+                    priority: number
+                    required_tools_tags: Json | null
+                    skills_tags: Json | null
+                    status: string
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    title: string
+                    game?: string | null
+                    mfg?: string | null
+                    estimated_minutes_min?: number | null
+                    estimated_minutes_max?: number | null
+                    priority?: number
+                    required_tools_tags?: Json | null
+                    skills_tags?: Json | null
+                    status?: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    title?: string
+                    game?: string | null
+                    mfg?: string | null
+                    estimated_minutes_min?: number | null
+                    estimated_minutes_max?: number | null
+                    priority?: number
+                    required_tools_tags?: Json | null
+                    skills_tags?: Json | null
+                    status?: string
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
+            recommendation_config: {
+                Row: {
+                    id: string
+                    user_id: string
+                    weight_priority: number
+                    weight_time_fit: number
+                    weight_skill_match: number
+                    weight_stale: number
+                    weight_recency_penalty: number
+                    stale_days_threshold: number
+                    recent_days_threshold: number
+                    focus_skills: Json | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    weight_priority?: number
+                    weight_time_fit?: number
+                    weight_skill_match?: number
+                    weight_stale?: number
+                    weight_recency_penalty?: number
+                    stale_days_threshold?: number
+                    recent_days_threshold?: number
+                    focus_skills?: Json | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    weight_priority?: number
+                    weight_time_fit?: number
+                    weight_skill_match?: number
+                    weight_stale?: number
+                    weight_recency_penalty?: number
+                    stale_days_threshold?: number
+                    recent_days_threshold?: number
+                    focus_skills?: Json | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
         }
     }
 }

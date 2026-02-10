@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import EventForm from './EventForm'
 import EntryForm from './EntryForm'
 import Link from 'next/link'
+import StartAttemptButton from './StartAttemptButton'
 
 export default async function AttemptDetailPage({
     params,
@@ -45,6 +46,11 @@ export default async function AttemptDetailPage({
                     <p className="text-sm text-[var(--color-text)] opacity-70 mb-4">
                         {details.derived.reasoning}
                     </p>
+                    {details.derived.derivedState === 'NONE' ? (
+                        <div className="mb-4">
+                            <StartAttemptButton attemptId={details.attempt.id} />
+                        </div>
+                    ) : null}
                     <div className="flex flex-wrap gap-2">
                         {details.derived.allowedActions.length === 0 ? (
                             <span className="text-sm text-[var(--color-text)] opacity-60">

@@ -62,6 +62,14 @@ export async function getAttemptDetails(attemptId: string): Promise<AttemptDetai
     }
 }
 
+export async function startAttempt(attemptId: string) {
+    return addProgressEvent({
+        attemptId,
+        eventType: 'ATTEMPT_STARTED',
+        payload: null,
+    })
+}
+
 export async function addProgressEvent(params: {
     attemptId: string
     eventType: EventType
