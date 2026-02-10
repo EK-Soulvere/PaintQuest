@@ -13,6 +13,13 @@ export default async function PlanPage() {
         redirect('/auth')
     }
 
+    const { data: profile } = await supabase
+        .from('profile')
+        .select('default_time_bucket')
+        .maybeSingle()
+
+    const defaultBucket = profile?.default_time_bucket ?? 30
+
     return (
         <div className="min-h-screen p-8">
             <div className="max-w-4xl mx-auto space-y-6">
@@ -24,7 +31,7 @@ export default async function PlanPage() {
                         Choose a time bucket and get 5 recommended tasks.
                     </p>
                 </div>
-                <PlanPanel />
+                <PlanPanel defaultMinutes={defaultBucket} />
             </div>
         </div>
     )

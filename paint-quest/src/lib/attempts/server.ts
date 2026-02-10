@@ -165,6 +165,49 @@ export async function getActiveAttemptIdsForUser(
     return active
 }
 
+export async function getActiveAttemptForUser() {
+    const supabase = await createClient()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+        throw new Error('Not authenticated')
+    }
+
+    const { data: attempts, error } = await supabase
+        .from('attempt')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+    if (error || !attempts || attempts.length === 0) {
+        return null
+    }
+
+    const attemptIds = attempts.map((attempt) => attempt.id)
+    const { data: events } = await supabase
+        .from('progress_event')
+        .select('attempt_id,event_type,timestamp')
+        .in('attempt_id', attemptIds)
+        .order('timestamp', { ascending: true })
+
+    const eventsByAttempt = new Map<string, { event_type: string; timestamp: string }[]>()
+    for (const event of events || []) {
+        const list = eventsByAttempt.get(event.attempt_id) || []
+        list.push({ event_type: event.event_type, timestamp: event.timestamp })
+        eventsByAttempt.set(event.attempt_id, list)
+    }
+
+    for (const attempt of attempts) {
+        const derived = deriveAttemptState(eventsByAttempt.get(attempt.id) || [])
+        if (derived.derivedState === 'IN_PROGRESS') {
+            return { attempt, derived }
+        }
+    }
+
+    return null
+}
+
 export async function addAttemptEntry(params: {
     attemptId: string
     entryType: string

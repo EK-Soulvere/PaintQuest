@@ -1,6 +1,6 @@
 import { getAttemptDetails } from '@/lib/attempts/server'
 import { notFound } from 'next/navigation'
-import EventForm from './EventForm'
+import QuestActions from './QuestActions'
 import Link from 'next/link'
 import StartAttemptButton from './StartAttemptButton'
 
@@ -70,9 +70,12 @@ export default async function AttemptDetailPage({
 
                 <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
                     <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
-                        Record Event
+                        Quest Actions
                     </h2>
-                    <EventForm attemptId={details.attempt.id} />
+                    <QuestActions
+                        attemptId={details.attempt.id}
+                        allowedActions={details.derived.allowedActions}
+                    />
                 </div>
 
                 <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const timeBuckets = [15, 30, 45, 60, 90, 120]
@@ -17,12 +17,21 @@ interface Recommendation {
     reasons: string[]
 }
 
-export default function PlanPanel() {
-    const [minutes, setMinutes] = useState(30)
+interface PlanPanelProps {
+    defaultMinutes?: number
+}
+
+export default function PlanPanel({ defaultMinutes = 30 }: PlanPanelProps) {
+    const [minutes, setMinutes] = useState(defaultMinutes)
     const [loading, setLoading] = useState(false)
     const [recommendations, setRecommendations] = useState<Recommendation[]>([])
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
+
+    useEffect(() => {
+        void fetchRecommendations()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const fetchRecommendations = async () => {
         setLoading(true)
