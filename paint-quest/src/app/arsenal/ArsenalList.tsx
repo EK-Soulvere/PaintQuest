@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import type { Database } from '@/lib/types/database.types'
+import { TOOL_TAGS } from '@/lib/constants/tags'
+import TagMultiSelect from '@/components/TagMultiSelect'
 
 type ArsenalItem = Database['public']['Tables']['arsenal_item']['Row']
 
@@ -158,12 +160,25 @@ export default function ArsenalList({ initialItems }: ArsenalListProps) {
                                 <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
                                     Tags (comma separated)
                                 </label>
-                                <input
-                                    value={Array.isArray(item.tags) ? item.tags.join(', ') : ''}
-                                    onChange={(e) => handleFieldChange(item.id, 'tags', e.target.value)}
-                                    onBlur={(e) => handleFieldBlur(item.id, 'tags', e.target.value)}
-                                    className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                />
+                                {item.category === 'tool' ? (
+                                    <TagMultiSelect
+                                        label="Tool Tags"
+                                        options={TOOL_TAGS as unknown as string[]}
+                                        value={Array.isArray(item.tags) ? item.tags.map(String) : []}
+                                        onChange={(next) => {
+                                            handleFieldChange(item.id, 'tags', next)
+                                            handleFieldBlur(item.id, 'tags', next)
+                                        }}
+                                    />
+                                ) : (
+                                    <input
+                                        value={Array.isArray(item.tags) ? item.tags.join(', ') : ''}
+                                        onChange={(e) => handleFieldChange(item.id, 'tags', e.target.value)}
+                                        onBlur={(e) => handleFieldBlur(item.id, 'tags', e.target.value)}
+                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                                        placeholder="Add tags (comma separated)"
+                                    />
+                                )}
                             </div>
                             <button
                                 onClick={() => deleteItem(item.id)}

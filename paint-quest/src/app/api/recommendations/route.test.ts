@@ -75,5 +75,7 @@ describe('GET /api/recommendations', () => {
 
         expect(response.status).toBe(200)
         expect(body.recommendations).toHaveLength(1)
+        expect(body.meta.hasTasks).toBe(true)
+        expect(body.meta.health).toBeDefined()
     })
 })

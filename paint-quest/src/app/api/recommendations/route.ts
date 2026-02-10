@@ -59,7 +59,53 @@ export async function GET(request: Request) {
             arsenal: arsenal || [],
         })
 
-        return NextResponse.json({ recommendations })
+        const tasksList = tasks || []
+        const missingTimeRange = tasksList.filter(
+            (task) => task.estimated_minutes_min == null || task.estimated_minutes_max == null
+        ).length
+        const missingTags = tasksList.filter((task) => {
+            const required = Array.isArray(task.required_tools_tags)
+                ? task.required_tools_tags
+                : []
+            const skills = Array.isArray(task.skills_tags) ? task.skills_tags : []
+            return required.length === 0 && skills.length === 0
+        }).length
+        const lowPriority = tasksList.filter((task) => task.priority <= 2).length
+
+        const debug = searchParams.get('debug') === '1'
+        if (debug) {
+            console.log('recommendations_debug', {
+                availableMinutes,
+                taskCount: tasksList.length,
+                recommendations: recommendations.map((rec) => ({
+                    id: rec.task.id,
+                    title: rec.task.title,
+                    score: rec.score,
+                    reasons: rec.reasons,
+                })),
+            })
+        }
+
+        return NextResponse.json({
+            recommendations,
+            meta: {
+                hasTasks: tasksList.length > 0,
+                taskCount: tasksList.length,
+                health: {
+                    missingTimeRange,
+                    missingTags,
+                    lowPriority,
+                },
+            },
+            debug: debug
+                ? recommendations.map((rec) => ({
+                      id: rec.task.id,
+                      title: rec.task.title,
+                      score: rec.score,
+                      reasons: rec.reasons,
+                  }))
+                : undefined,
+        })
     } catch (error) {
         return NextResponse.json(
             { error: error instanceof Error ? error.message : 'Unknown error' },

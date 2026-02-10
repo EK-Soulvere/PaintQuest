@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Database } from '@/lib/types/database.types'
+import TagMultiSelect from '@/components/TagMultiSelect'
+import { TOOL_TAGS, SKILL_TAGS } from '@/lib/constants/tags'
 
 type Task = Database['public']['Tables']['task']['Row']
 
@@ -15,7 +17,19 @@ interface TasksListProps {
 export default function TasksList({ initialTasks }: TasksListProps) {
     const [tasks, setTasks] = useState<Task[]>(initialTasks)
     const [creating, setCreating] = useState(false)
+    const [seeding, setSeeding] = useState(false)
     const router = useRouter()
+
+    const normalizeTags = (value: Task['required_tools_tags']): string[] => {
+        if (Array.isArray(value)) return value.map(String)
+        if (typeof value === 'string') {
+            return value
+                .split(',')
+                .map((part) => part.trim())
+                .filter(Boolean)
+        }
+        return []
+    }
 
     const createEmptyTask = async () => {
         setCreating(true)
@@ -96,6 +110,24 @@ export default function TasksList({ initialTasks }: TasksListProps) {
         }
     }
 
+    const seedDefaults = async () => {
+        setSeeding(true)
+        try {
+            const response = await fetch('/api/tasks/seed', { method: 'POST' })
+            const data = await response.json()
+            if (!response.ok) {
+                throw new Error(data?.error || 'Failed to seed tasks')
+            }
+            setTasks(data.tasks || [])
+            router.refresh()
+        } catch (error) {
+            console.error(error)
+            alert('Failed to seed tasks')
+        } finally {
+            setSeeding(false)
+        }
+    }
+
     return (
         <div className="space-y-6">
             <button
@@ -111,9 +143,64 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                     <p className="text-[var(--color-text)] opacity-70">
                         No tasks yet. Create your first one!
                     </p>
+                    <div className="mt-4 flex flex-col md:flex-row gap-3 justify-center">
+                        <button
+                            onClick={seedDefaults}
+                            disabled={seeding}
+                            className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-bg)] font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                        >
+                            {seeding ? 'Generating...' : 'Generate 5 Starter Tasks'}
+                        </button>
+                        <button
+                            onClick={createEmptyTask}
+                            disabled={creating}
+                            className="px-4 py-2 border border-[var(--color-border)] text-[var(--color-text)] font-semibold rounded-md hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
+                        >
+                            {creating ? 'Creating...' : 'Create Empty Task'}
+                        </button>
+                    </div>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
+                    {tasks.length > 0 ? (
+                        <div className="p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-xs text-[var(--color-text)] opacity-80">
+                            <p className="font-medium text-[var(--color-secondary)] mb-2">
+                                Task Health
+                            </p>
+                            <div className="flex flex-wrap gap-4">
+                                <span>
+                                    Missing time range:{' '}
+                                    {
+                                        tasks.filter(
+                                            (task) =>
+                                                task.estimated_minutes_min == null ||
+                                                task.estimated_minutes_max == null
+                                        ).length
+                                    }
+                                </span>
+                                <span>
+                                    Missing tags:{' '}
+                                    {
+                                        tasks.filter((task) => {
+                                            const required = Array.isArray(task.required_tools_tags)
+                                                ? task.required_tools_tags
+                                                : []
+                                            const skills = Array.isArray(task.skills_tags)
+                                                ? task.skills_tags
+                                                : []
+                                            return required.length === 0 && skills.length === 0
+                                        }).length
+                                    }
+                                </span>
+                                <span>
+                                    Low priority (<=2):{' '}
+                                    {tasks.filter((task) => task.priority <= 2).length}
+                                </span>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    <div className="space-y-4">
                     {tasks.map((task) => (
                         <div
                             key={task.id}
@@ -250,50 +337,26 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
-                                        Required Tools Tags
-                                    </label>
-                                    <input
-                                        value={
-                                            Array.isArray(task.required_tools_tags)
-                                                ? task.required_tools_tags.join(', ')
-                                                : typeof task.required_tools_tags === 'string'
-                                                    ? task.required_tools_tags
-                                                    : ''
-                                        }
-                                        onChange={(e) =>
-                                            handleFieldChange(task.id, 'required_tools_tags', e.target.value)
-                                        }
-                                        onBlur={(e) =>
-                                            handleFieldBlur(task.id, 'required_tools_tags', e.target.value)
-                                        }
-                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                        placeholder="Required tools tags (comma separated)"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
-                                        Skills Tags
-                                    </label>
-                                    <input
-                                        value={
-                                            Array.isArray(task.skills_tags)
-                                                ? task.skills_tags.join(', ')
-                                                : typeof task.skills_tags === 'string'
-                                                    ? task.skills_tags
-                                                    : ''
-                                        }
-                                        onChange={(e) =>
-                                            handleFieldChange(task.id, 'skills_tags', e.target.value)
-                                        }
-                                        onBlur={(e) =>
-                                            handleFieldBlur(task.id, 'skills_tags', e.target.value)
-                                        }
-                                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                                        placeholder="Skills tags (comma separated)"
-                                    />
-                                </div>
+                                <TagMultiSelect
+                                    label="Required Tools Tags"
+                                    options={TOOL_TAGS as unknown as string[]}
+                                    value={normalizeTags(task.required_tools_tags)}
+                                    onChange={(next) => {
+                                        handleFieldChange(task.id, 'required_tools_tags', next)
+                                        handleFieldBlur(task.id, 'required_tools_tags', next)
+                                    }}
+                                    placeholder="Add custom tool tag"
+                                />
+                                <TagMultiSelect
+                                    label="Skills Tags"
+                                    options={SKILL_TAGS as unknown as string[]}
+                                    value={normalizeTags(task.skills_tags)}
+                                    onChange={(next) => {
+                                        handleFieldChange(task.id, 'skills_tags', next)
+                                        handleFieldBlur(task.id, 'skills_tags', next)
+                                    }}
+                                    placeholder="Add custom skill tag"
+                                />
                             </div>
 
                             <div className="flex items-center justify-between">
@@ -312,6 +375,7 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                             </div>
                         </div>
                     ))}
+                    </div>
                 </div>
             )}
         </div>

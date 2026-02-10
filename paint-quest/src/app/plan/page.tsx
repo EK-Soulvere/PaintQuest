@@ -31,7 +31,7 @@ export default async function PlanPage() {
                         Choose a time bucket and get 5 recommended tasks.
                     </p>
                 </div>
-                <PlanPanel defaultMinutes={defaultBucket} />
+                <PlanPanel defaultMinutes={defaultBucket} showStartButtons />
             </div>
         </div>
     )

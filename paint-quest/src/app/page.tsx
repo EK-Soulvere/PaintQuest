@@ -63,7 +63,7 @@ export default async function Home() {
               Welcome back, {user.email}!
             </p>
             <div className="text-left">
-              <PlanPanel defaultMinutes={defaultBucket} />
+              <PlanPanel defaultMinutes={defaultBucket} showStartButtons />
             </div>
             <div className="flex gap-4 justify-center">
               <Link

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Database } from '@/lib/types/database.types'
+import TagMultiSelect from '@/components/TagMultiSelect'
+import { TOOL_TAGS, SKILL_TAGS } from '@/lib/constants/tags'
 
 type Task = Database['public']['Tables']['task']['Row']
 
@@ -17,6 +19,17 @@ export default function TaskDetailEditor({ task }: TaskDetailEditorProps) {
     const [saving, setSaving] = useState(false)
     const router = useRouter()
 
+    const normalizeTags = (value: Task['required_tools_tags']): string[] => {
+        if (Array.isArray(value)) return value.map(String)
+        if (typeof value === 'string') {
+            return value
+                .split(',')
+                .map((part) => part.trim())
+                .filter(Boolean)
+        }
+        return []
+    }
+
     const updateDraft = (field: keyof Task, value: Task[keyof Task]) => {
         setDraft((prev) => ({ ...prev, [field]: value }))
     }
@@ -29,12 +42,8 @@ export default function TaskDetailEditor({ task }: TaskDetailEditorProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...draft,
-                    required_tools_tags: Array.isArray(draft.required_tools_tags)
-                        ? draft.required_tools_tags.join(', ')
-                        : draft.required_tools_tags,
-                    skills_tags: Array.isArray(draft.skills_tags)
-                        ? draft.skills_tags.join(', ')
-                        : draft.skills_tags,
+                    required_tools_tags: normalizeTags(draft.required_tools_tags),
+                    skills_tags: normalizeTags(draft.skills_tags),
                 }),
             })
             const data = await response.json()
@@ -140,34 +149,20 @@ export default function TaskDetailEditor({ task }: TaskDetailEditorProps) {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">Required Tools Tags</label>
-                    <input
-                        value={
-                            Array.isArray(draft.required_tools_tags)
-                                ? draft.required_tools_tags.join(', ')
-                                : typeof draft.required_tools_tags === 'string'
-                                    ? draft.required_tools_tags
-                                    : ''
-                        }
-                        onChange={(e) => updateDraft('required_tools_tags', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2">Skills Tags</label>
-                    <input
-                        value={
-                            Array.isArray(draft.skills_tags)
-                                ? draft.skills_tags.join(', ')
-                                : typeof draft.skills_tags === 'string'
-                                    ? draft.skills_tags
-                                    : ''
-                        }
-                        onChange={(e) => updateDraft('skills_tags', e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                    />
-                </div>
+                <TagMultiSelect
+                    label="Required Tools Tags"
+                    options={TOOL_TAGS as unknown as string[]}
+                    value={normalizeTags(draft.required_tools_tags)}
+                    onChange={(next) => updateDraft('required_tools_tags', next)}
+                    placeholder="Add custom tool tag"
+                />
+                <TagMultiSelect
+                    label="Skills Tags"
+                    options={SKILL_TAGS as unknown as string[]}
+                    value={normalizeTags(draft.skills_tags)}
+                    onChange={(next) => updateDraft('skills_tags', next)}
+                    placeholder="Add custom skill tag"
+                />
             </div>
 
             <div className="flex items-center justify-between">

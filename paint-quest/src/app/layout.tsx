@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Jacquard_12_Charted } from "next/font/google";
 import "./globals.css";
+import NavBar from "./NavBar";
 
 const jacquard = Jacquard_12_Charted({
   weight: "400",
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body
         className={`${jacquard.variable} antialiased`}
       >
+        <NavBar />
         {children}
       </body>
     </html>

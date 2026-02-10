@@ -59,13 +59,13 @@ function skillMatchScore(taskSkills: string[], focusSkills: string[]): number {
 function energyFitScore(availableMinutes: number, preference: string | null): number {
     if (!preference) return 0
     if (preference === 'low') {
-        return availableMinutes <= 30 ? 1 : 0
+        return availableMinutes <= 30 ? 0.25 : 0
     }
     if (preference === 'med') {
-        return availableMinutes > 30 && availableMinutes <= 60 ? 1 : 0
+        return availableMinutes > 30 && availableMinutes <= 60 ? 0.25 : 0
     }
     if (preference === 'high') {
-        return availableMinutes > 60 ? 1 : 0
+        return availableMinutes > 60 ? 0.25 : 0
     }
     return 0
 }
@@ -81,8 +81,8 @@ function arsenalMatchScore(requiredTags: string[], arsenal: ArsenalItem[] | unde
         }
     }
     const missing = requiredTags.filter((tag) => !availableTags.has(tag))
-    if (missing.length === 0) return 0.5
-    return -0.5
+    if (missing.length === 0) return 0.25
+    return -0.25
 }
 
 function constraintPenalty(requiredTags: string[], constraints: Json | null): number {
@@ -91,7 +91,7 @@ function constraintPenalty(requiredTags: string[], constraints: Json | null): nu
     const excluded = (constraints as { excluded_tools_tags?: string[] }).excluded_tools_tags
     if (!excluded || excluded.length === 0) return 0
     const hits = requiredTags.filter((tag) => excluded.includes(tag))
-    return hits.length > 0 ? -1 : 0
+    return hits.length > 0 ? -0.5 : 0
 }
 
 function lastAttemptedForTask(attempts: Attempt[], taskId: string): Attempt | null {
@@ -127,7 +127,7 @@ export function recommendTasks(input: RecommendationInput): RecommendationResult
 
     const scored = tasks.map((task) => {
         const reasons: string[] = []
-        let score = 0
+        let score = 0.5
 
         const pScore = priorityScore(task.priority)
         score += pScore * weights.priority
@@ -185,7 +185,7 @@ export function recommendTasks(input: RecommendationInput): RecommendationResult
             }
         }
 
-        return { task, score, reasons }
+        return { task, score: Math.max(0, score), reasons }
     })
 
     return scored
