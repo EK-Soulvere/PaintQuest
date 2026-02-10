@@ -204,7 +204,9 @@ export default function PlanPanel({ defaultMinutes = 30, showStartButtons = true
                     <div className="flex flex-wrap gap-4">
                         <span>Missing time range: {meta.health.missingTimeRange}</span>
                         <span>Missing tags: {meta.health.missingTags}</span>
-                        <span>Low priority (<=2): {meta.health.lowPriority}</span>
+                        <span>
+                            Low priority ({'<='}2): {meta.health.lowPriority}
+                        </span>
                     </div>
                 </div>
             ) : null}
