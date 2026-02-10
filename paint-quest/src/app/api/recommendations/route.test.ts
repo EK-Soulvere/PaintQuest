@@ -37,6 +37,18 @@ function makeSupabaseStub() {
                     maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
                 }
             }
+            if (table === 'profile') {
+                return {
+                    select: vi.fn().mockReturnThis(),
+                    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+                }
+            }
+            if (table === 'arsenal_item') {
+                return {
+                    select: vi.fn().mockReturnThis(),
+                    eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+                }
+            }
             return {
                 select: vi.fn().mockResolvedValue({ data: [], error: null }),
             }

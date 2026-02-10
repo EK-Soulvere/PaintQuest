@@ -113,4 +113,87 @@ describe('recommendTasks', () => {
 
         expect(results[0].reasons.some((r) => r.includes('skill match'))).toBe(true)
     })
+
+    it('penalizes when required tools are missing', () => {
+        const tasks = [
+            {
+                ...baseTask,
+                id: 'task-1',
+                required_tools_tags: ['airbrush'],
+                priority: 5,
+            },
+        ]
+
+        const results = recommendTasks({
+            tasks,
+            attempts: [],
+            availableMinutes: 45,
+            arsenal: [
+                {
+                    id: 'item-1',
+                    user_id: 'user-1',
+                    category: 'tool',
+                    name: 'brush',
+                    tags: ['brush'],
+                    available: true,
+                    created_at: '2026-02-01T00:00:00Z',
+                    updated_at: '2026-02-01T00:00:00Z',
+                },
+            ],
+        })
+
+        expect(results[0].reasons.some((r) => r.includes('missing required tools'))).toBe(true)
+    })
+
+    it('applies constraint penalty', () => {
+        const tasks = [
+            {
+                ...baseTask,
+                id: 'task-1',
+                required_tools_tags: ['airbrush'],
+            },
+        ]
+
+        const results = recommendTasks({
+            tasks,
+            attempts: [],
+            availableMinutes: 45,
+            profile: {
+                id: 'profile-1',
+                user_id: 'user-1',
+                media: null,
+                focus_skills_top3: null,
+                focus_skills_bottom3: null,
+                default_time_bucket: null,
+                constraints: { excluded_tools_tags: ['airbrush'] },
+                energy_preference: null,
+                created_at: '2026-02-01T00:00:00Z',
+                updated_at: '2026-02-01T00:00:00Z',
+            },
+        })
+
+        expect(results[0].reasons.some((r) => r.includes('blocked by constraints'))).toBe(true)
+    })
+
+    it('adds energy fit when preference matches', () => {
+        const results = recommendTasks({
+            tasks: [{ ...baseTask, id: 'task-1' }],
+            attempts: [],
+            availableMinutes: 20,
+            profile: {
+                id: 'profile-1',
+                user_id: 'user-1',
+                media: null,
+                focus_skills_top3: null,
+                focus_skills_bottom3: null,
+                default_time_bucket: 30,
+                constraints: null,
+                energy_preference: 'low',
+                created_at: '2026-02-01T00:00:00Z',
+                updated_at: '2026-02-01T00:00:00Z',
+            },
+        })
+
+        expect(results[0].reasons.some((r) => r.includes('energy fit'))).toBe(true)
+    })
 })

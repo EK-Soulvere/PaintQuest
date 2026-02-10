@@ -40,11 +40,23 @@ export async function GET(request: Request) {
             .select('*')
             .maybeSingle()
 
+        const { data: profile } = await supabase
+            .from('profile')
+            .select('*')
+            .maybeSingle()
+
+        const { data: arsenal } = await supabase
+            .from('arsenal_item')
+            .select('*')
+            .eq('available', true)
+
         const recommendations = recommendTasks({
             tasks: tasks || [],
             attempts: attempts || [],
             availableMinutes,
             config,
+            profile,
+            arsenal: arsenal || [],
         })
 
         return NextResponse.json({ recommendations })

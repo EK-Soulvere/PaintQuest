@@ -3,6 +3,8 @@ import type { Database, Json } from '@/lib/types/database.types'
 type Task = Database['public']['Tables']['task']['Row']
 type Attempt = Database['public']['Tables']['attempt']['Row']
 type RecommendationConfig = Database['public']['Tables']['recommendation_config']['Row']
+type Profile = Database['public']['Tables']['profile']['Row']
+type ArsenalItem = Database['public']['Tables']['arsenal_item']['Row']
 
 export interface RecommendationResult {
     task: Task
@@ -15,6 +17,8 @@ export interface RecommendationInput {
     attempts: Attempt[]
     availableMinutes: number
     config?: RecommendationConfig | null
+    profile?: Profile | null
+    arsenal?: ArsenalItem[]
 }
 
 function normalizeTags(tags: Json | null): string[] {
@@ -52,6 +56,44 @@ function skillMatchScore(taskSkills: string[], focusSkills: string[]): number {
     return matches.length / Math.max(taskSkills.length, 1)
 }
 
+function energyFitScore(availableMinutes: number, preference: string | null): number {
+    if (!preference) return 0
+    if (preference === 'low') {
+        return availableMinutes <= 30 ? 1 : 0
+    }
+    if (preference === 'med') {
+        return availableMinutes > 30 && availableMinutes <= 60 ? 1 : 0
+    }
+    if (preference === 'high') {
+        return availableMinutes > 60 ? 1 : 0
+    }
+    return 0
+}
+
+function arsenalMatchScore(requiredTags: string[], arsenal: ArsenalItem[] | undefined): number {
+    if (!requiredTags.length) return 0
+    if (!arsenal || arsenal.length === 0) return -1
+    const availableTags = new Set<string>()
+    for (const item of arsenal) {
+        if (!item.available) continue
+        for (const tag of normalizeTags(item.tags)) {
+            availableTags.add(tag)
+        }
+    }
+    const missing = requiredTags.filter((tag) => !availableTags.has(tag))
+    if (missing.length === 0) return 0.5
+    return -0.5
+}
+
+function constraintPenalty(requiredTags: string[], constraints: Json | null): number {
+    if (!constraints || !requiredTags.length) return 0
+    if (typeof constraints !== 'object' || Array.isArray(constraints)) return 0
+    const excluded = (constraints as { excluded_tools_tags?: string[] }).excluded_tools_tags
+    if (!excluded || excluded.length === 0) return 0
+    const hits = requiredTags.filter((tag) => excluded.includes(tag))
+    return hits.length > 0 ? -1 : 0
+}
+
 function lastAttemptedForTask(attempts: Attempt[], taskId: string): Attempt | null {
     const matches = attempts.filter((attempt) => attempt.task_id === taskId)
     if (matches.length === 0) return null
@@ -64,6 +106,8 @@ export function recommendTasks(input: RecommendationInput): RecommendationResult
         attempts,
         availableMinutes,
         config,
+        profile,
+        arsenal,
     } = input
 
     const weights = {
@@ -76,6 +120,8 @@ export function recommendTasks(input: RecommendationInput): RecommendationResult
     const staleDays = config?.stale_days_threshold ?? 14
     const recentDays = config?.recent_days_threshold ?? 3
     const focusSkills = normalizeTags(config?.focus_skills ?? null)
+    const profileFocus = normalizeTags(profile?.focus_skills_top3 ?? null)
+    const profileConstraints = profile?.constraints ?? null
 
     const now = new Date()
 
@@ -96,11 +142,32 @@ export function recommendTasks(input: RecommendationInput): RecommendationResult
         reasons.push(`time fit ${tScore.toFixed(2)}`)
 
         const skills = normalizeTags(task.skills_tags)
-        const sScore = skillMatchScore(skills, focusSkills)
-        if (skills.length > 0 && focusSkills.length > 0) {
+        const sScore = skillMatchScore(skills, focusSkills.length ? focusSkills : profileFocus)
+        if (skills.length > 0 && (focusSkills.length > 0 || profileFocus.length > 0)) {
             reasons.push(`skill match ${sScore.toFixed(2)}`)
         }
         score += sScore * weights.skillMatch
+
+        const requiredTools = normalizeTags(task.required_tools_tags)
+        const arsenalScore = arsenalMatchScore(requiredTools, arsenal)
+        if (requiredTools.length > 0) {
+            reasons.push(
+                arsenalScore < 0 ? 'missing required tools' : 'tools available'
+            )
+        }
+        score += arsenalScore
+
+        const constraintScore = constraintPenalty(requiredTools, profileConstraints)
+        if (constraintScore < 0) {
+            reasons.push('blocked by constraints')
+        }
+        score += constraintScore
+
+        const energyScore = energyFitScore(availableMinutes, profile?.energy_preference ?? null)
+        if (energyScore > 0) {
+            reasons.push(`energy fit ${profile?.energy_preference}`)
+        }
+        score += energyScore
 
         const lastAttempt = lastAttemptedForTask(attempts, task.id)
         if (!lastAttempt) {

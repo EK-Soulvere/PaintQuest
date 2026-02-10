@@ -64,6 +64,32 @@ CREATE TABLE IF NOT EXISTS recommendation_config (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Create profile table
+CREATE TABLE IF NOT EXISTS profile (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  media JSONB,
+  focus_skills_top3 JSONB,
+  focus_skills_bottom3 JSONB,
+  default_time_bucket INT,
+  constraints JSONB,
+  energy_preference TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Create arsenal_item table
+CREATE TABLE IF NOT EXISTS arsenal_item (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  category TEXT NOT NULL,
+  name TEXT NOT NULL,
+  tags JSONB,
+  available BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attempt_user_id ON attempt(user_id);
 CREATE INDEX IF NOT EXISTS idx_attempt_created_at ON attempt(created_at DESC);
@@ -76,6 +102,9 @@ CREATE INDEX IF NOT EXISTS idx_task_user_id ON task(user_id);
 CREATE INDEX IF NOT EXISTS idx_task_status ON task(status);
 CREATE INDEX IF NOT EXISTS idx_task_priority ON task(priority DESC);
 CREATE INDEX IF NOT EXISTS idx_recommendation_config_user_id ON recommendation_config(user_id);
+CREATE INDEX IF NOT EXISTS idx_profile_user_id ON profile(user_id);
+CREATE INDEX IF NOT EXISTS idx_arsenal_item_user_id ON arsenal_item(user_id);
+CREATE INDEX IF NOT EXISTS idx_arsenal_item_available ON arsenal_item(available);
 
 -- Enable Row Level Security
 ALTER TABLE attempt ENABLE ROW LEVEL SECURITY;
@@ -83,6 +112,8 @@ ALTER TABLE progress_event ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attempt_entry ENABLE ROW LEVEL SECURITY;
 ALTER TABLE task ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendation_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profile ENABLE ROW LEVEL SECURITY;
+ALTER TABLE arsenal_item ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for attempt table
 -- Users can only see their own attempts
@@ -263,5 +294,49 @@ CREATE POLICY "Users can update own recommendation configs"
 
 CREATE POLICY "Users can delete own recommendation configs"
   ON recommendation_config
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- RLS Policies for profile table
+CREATE POLICY "Users can view own profile"
+  ON profile
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own profile"
+  ON profile
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own profile"
+  ON profile
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own profile"
+  ON profile
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- RLS Policies for arsenal_item table
+CREATE POLICY "Users can view own arsenal items"
+  ON arsenal_item
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own arsenal items"
+  ON arsenal_item
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own arsenal items"
+  ON arsenal_item
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own arsenal items"
+  ON arsenal_item
   FOR DELETE
   USING (auth.uid() = user_id);

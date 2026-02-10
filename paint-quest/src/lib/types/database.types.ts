@@ -169,6 +169,76 @@ export interface Database {
                     updated_at?: string
                 }
             }
+            profile: {
+                Row: {
+                    id: string
+                    user_id: string
+                    media: Json | null
+                    focus_skills_top3: Json | null
+                    focus_skills_bottom3: Json | null
+                    default_time_bucket: number | null
+                    constraints: Json | null
+                    energy_preference: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    media?: Json | null
+                    focus_skills_top3?: Json | null
+                    focus_skills_bottom3?: Json | null
+                    default_time_bucket?: number | null
+                    constraints?: Json | null
+                    energy_preference?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    media?: Json | null
+                    focus_skills_top3?: Json | null
+                    focus_skills_bottom3?: Json | null
+                    default_time_bucket?: number | null
+                    constraints?: Json | null
+                    energy_preference?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
+            arsenal_item: {
+                Row: {
+                    id: string
+                    user_id: string
+                    category: string
+                    name: string
+                    tags: Json | null
+                    available: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    category: string
+                    name: string
+                    tags?: Json | null
+                    available?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    category?: string
+                    name?: string
+                    tags?: Json | null
+                    available?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
         }
     }
 }
