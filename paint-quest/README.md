@@ -20,6 +20,15 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## API Docs
+
+- Swagger UI: `http://localhost:3000/api/docs`
+- OpenAPI JSON: `http://localhost:3000/api/openapi`
+
+Notes:
+- Most endpoints require an authenticated Supabase session cookie.
+- Use the browser session from a signed-in user when testing protected endpoints.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
