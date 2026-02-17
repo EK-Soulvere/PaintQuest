@@ -23,7 +23,19 @@ function makeSupabaseStub() {
             if (table === 'task') {
                 return {
                     select: vi.fn().mockReturnThis(),
-                    neq: vi.fn().mockResolvedValue({ data: [{ id: 'task-1' }], error: null }),
+                    in: vi.fn().mockResolvedValue({
+                        data: [
+                            {
+                                id: 'task-1',
+                                estimated_minutes_min: 30,
+                                estimated_minutes_max: 60,
+                                required_tools_tags: [],
+                                skills_tags: [],
+                                priority: 3,
+                            },
+                        ],
+                        error: null,
+                    }),
                 }
             }
             if (table === 'attempt') {
