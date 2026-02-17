@@ -15,7 +15,6 @@ export default function TagMultiSelect({
     options,
     value,
     onChange,
-    placeholder,
 }: TagMultiSelectProps) {
     const normalized = useMemo(() => value.map((tag) => tag.toLowerCase()), [value])
 
@@ -76,7 +75,7 @@ export default function TagMultiSelect({
                 })}
             </div>
 
-            {/* Custom tag add temporarily disabled: {placeholder} */}
+            {/* Custom tag add temporarily disabled */}
         </div>
     )
 }

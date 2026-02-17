@@ -16,6 +16,7 @@ interface ArsenalListProps {
 export default function ArsenalList({ initialItems }: ArsenalListProps) {
     const [items, setItems] = useState<ArsenalItem[]>(initialItems)
     const [creating, setCreating] = useState(false)
+    const [uploading, setUploading] = useState(false)
 
     const createItem = async () => {
         setCreating(true)
@@ -84,6 +85,61 @@ export default function ArsenalList({ initialItems }: ArsenalListProps) {
         }
     }
 
+    const parseCsvRows = (text: string) => {
+        const lines = text
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter(Boolean)
+        if (lines.length < 2) return []
+
+        const headers = lines[0].split(',').map((header) => header.trim().toLowerCase())
+        const colorIndex = headers.findIndex((h) => h === 'color' || h === 'name')
+        const brandIndex = headers.findIndex((h) => h === 'brand')
+        const mediumIndex = headers.findIndex((h) => h === 'medium')
+        const availableIndex = headers.findIndex((h) => h === 'available')
+
+        if (colorIndex < 0) {
+            throw new Error('CSV must include a color column')
+        }
+
+        return lines.slice(1).map((line) => {
+            const cols = line.split(',').map((col) => col.trim())
+            return {
+                color: cols[colorIndex] || '',
+                brand: brandIndex >= 0 ? cols[brandIndex] || null : null,
+                medium: mediumIndex >= 0 ? cols[mediumIndex] || null : null,
+                available:
+                    availableIndex >= 0
+                        ? !['false', '0', 'no'].includes((cols[availableIndex] || '').toLowerCase())
+                        : true,
+            }
+        })
+    }
+
+    const handleBulkUpload = async (file: File | null) => {
+        if (!file) return
+        setUploading(true)
+        try {
+            const text = await file.text()
+            const rows = parseCsvRows(text)
+            const response = await fetch('/api/arsenal/bulk-paint', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rows }),
+            })
+            const data = await response.json()
+            if (!response.ok) {
+                throw new Error(data?.error || 'Bulk upload failed')
+            }
+            setItems((prev) => [...data.items, ...prev])
+        } catch (error) {
+            console.error(error)
+            alert(error instanceof Error ? error.message : 'Bulk upload failed')
+        } finally {
+            setUploading(false)
+        }
+    }
+
     return (
         <div className="space-y-6">
             <button
@@ -93,6 +149,28 @@ export default function ArsenalList({ initialItems }: ArsenalListProps) {
             >
                 {creating ? 'Creating...' : '+ New Item'}
             </button>
+            <div className="p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg space-y-2">
+                <p className="text-sm text-[var(--color-text)] opacity-80">
+                    Bulk Upload Paint CSV
+                </p>
+                <p className="text-xs text-[var(--color-text)] opacity-60">
+                    Headers: `color,brand,medium,available`
+                </p>
+                <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    disabled={uploading}
+                    onChange={(e) => {
+                        const file = e.target.files?.[0] || null
+                        void handleBulkUpload(file)
+                        e.currentTarget.value = ''
+                    }}
+                    className="text-sm"
+                />
+                {uploading ? (
+                    <p className="text-xs text-[var(--color-text)] opacity-60">Uploading...</p>
+                ) : null}
+            </div>
 
             {items.length === 0 ? (
                 <div className="text-center py-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">

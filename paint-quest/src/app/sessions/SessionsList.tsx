@@ -7,7 +7,7 @@ import type { AttemptState } from '@/lib/fsm/deriveAttemptState'
 import Link from 'next/link'
 
 type Attempt = Database['public']['Tables']['attempt']['Row']
-type AttemptWithState = Attempt & { derivedState: AttemptState }
+type AttemptWithState = Attempt & { derivedState: AttemptState; displayTitle?: string }
 
 interface SessionsListProps {
     initialAttempts: AttemptWithState[]
@@ -31,7 +31,14 @@ export default function SessionsList({ initialAttempts }: SessionsListProps) {
                 throw new Error(data?.error || 'Failed to create attempt')
             }
 
-            setAttempts([{ ...data.attempt, derivedState: data.derivedState }, ...attempts])
+            setAttempts([
+                {
+                    ...data.attempt,
+                    derivedState: data.derivedState,
+                    displayTitle: `Attempt #${data.attempt.id.slice(0, 8)}`,
+                },
+                ...attempts,
+            ])
             router.refresh()
         } catch (error) {
             console.error('Error creating attempt:', error)
@@ -68,7 +75,7 @@ export default function SessionsList({ initialAttempts }: SessionsListProps) {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <h3 className="text-lg font-semibold text-[var(--color-secondary)] mb-1">
-                                        Attempt #{attempt.id.slice(0, 8)}
+                                        {attempt.displayTitle || `Attempt #${attempt.id.slice(0, 8)}`}
                                     </h3>
                                     <p className="text-sm text-[var(--color-text)] opacity-60">
                                         Created {new Date(attempt.created_at).toLocaleString()}

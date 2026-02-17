@@ -103,7 +103,7 @@ export default function PlanPanel({ defaultMinutes = 30, showStartButtons = true
                     disabled={loading}
                     className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-bg)] font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
-                    {loading ? 'Loading...' : 'Get Recommendations'}
+                    {loading ? 'Loading...' : 'Get Quest Recommendations'}
                 </button>
             </div>
 
@@ -117,12 +117,12 @@ export default function PlanPanel({ defaultMinutes = 30, showStartButtons = true
                 <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
                     <p className="text-[var(--color-text)] opacity-70">
                         {meta?.hasTasks === false
-                            ? 'No tasks yet. Generate starter tasks to get recommendations.'
-                            : 'No recommendations matched. Try a different time bucket or adjust task details.'}
+                            ? 'No quests yet. Generate starter quests to get recommendations.'
+                            : 'No recommendations matched. Try a different time bucket or adjust quest details.'}
                     </p>
                     {meta?.hasTasks ? (
                         <p className="text-xs text-[var(--color-text)] opacity-50 mt-2">
-                            Tasks available: {meta.taskCount}
+                            Quests available: {meta.taskCount}
                         </p>
                     ) : null}
                     {meta?.hasTasks === false ? (
@@ -131,7 +131,7 @@ export default function PlanPanel({ defaultMinutes = 30, showStartButtons = true
                             disabled={seeding}
                             className="mt-4 px-4 py-2 bg-[var(--color-primary)] text-[var(--color-bg)] font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
                         >
-                            {seeding ? 'Generating...' : 'Generate 5 Starter Tasks'}
+                            {seeding ? 'Generating...' : 'Generate 5 Starter Quests'}
                         </button>
                     ) : null}
                 </div>
@@ -200,7 +200,7 @@ export default function PlanPanel({ defaultMinutes = 30, showStartButtons = true
             )}
             {meta?.health ? (
                 <div className="p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-xs text-[var(--color-text)] opacity-80">
-                    <p className="font-medium text-[var(--color-secondary)] mb-2">Task Health</p>
+                    <p className="font-medium text-[var(--color-secondary)] mb-2">Quest Backlog Health</p>
                     <div className="flex flex-wrap gap-4">
                         <span>Missing time range: {meta.health.missingTimeRange}</span>
                         <span>Missing tags: {meta.health.missingTags}</span>

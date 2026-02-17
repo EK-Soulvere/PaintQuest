@@ -107,3 +107,48 @@ export async function deleteArsenalItem(itemId: string) {
     if (error || !data) throw new Error('Failed to delete arsenal item')
     return data
 }
+
+export async function createBulkPaintItems(
+    rows: Array<{
+        color: string
+        brand?: string | null
+        medium?: string | null
+        available?: boolean
+    }>
+) {
+    const supabase = await createClient()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+        throw new Error('Not authenticated')
+    }
+
+    const payload = rows
+        .filter((row) => row.color.trim().length > 0)
+        .map((row) => {
+            const tags = [row.brand?.trim(), row.medium?.trim()].filter(Boolean) as string[]
+            return {
+                user_id: user.id,
+                category: 'paint',
+                name: row.color.trim(),
+                tags,
+                available: row.available ?? true,
+            }
+        })
+
+    if (payload.length === 0) {
+        return []
+    }
+
+    const { data, error } = await supabase
+        .from('arsenal_item')
+        .insert(payload)
+        .select('*')
+
+    if (error) {
+        throw new Error('Failed to bulk import paint items')
+    }
+
+    return data || []
+}

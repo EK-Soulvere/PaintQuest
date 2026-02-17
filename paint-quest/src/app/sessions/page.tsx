@@ -24,6 +24,38 @@ export default async function SessionsPage() {
         console.error('Error fetching attempts:', error)
     }
 
+    const taskIds = (attempts || [])
+        .map((attempt) => attempt.task_id)
+        .filter((id): id is string => Boolean(id))
+
+    const taskTitleMap = new Map<string, string>()
+    if (taskIds.length > 0) {
+        const { data: tasks } = await supabase
+            .from('task')
+            .select('id,title')
+            .in('id', Array.from(new Set(taskIds)))
+
+        for (const task of tasks || []) {
+            taskTitleMap.set(task.id, task.title)
+        }
+    }
+
+    const attemptSequenceMap = new Map<string, number>()
+    const attemptsByTask = new Map<string, { id: string; created_at: string }[]>()
+    for (const attempt of attempts || []) {
+        if (!attempt.task_id) continue
+        const list = attemptsByTask.get(attempt.task_id) || []
+        list.push({ id: attempt.id, created_at: attempt.created_at })
+        attemptsByTask.set(attempt.task_id, list)
+    }
+
+    for (const list of attemptsByTask.values()) {
+        const ordered = [...list].sort((a, b) => a.created_at.localeCompare(b.created_at))
+        ordered.forEach((row, idx) => {
+            attemptSequenceMap.set(row.id, idx + 1)
+        })
+    }
+
     const attemptsWithState = await Promise.all(
         (attempts || []).map(async (attempt) => {
             const { data: events } = await supabase
@@ -33,7 +65,13 @@ export default async function SessionsPage() {
                 .order('timestamp', { ascending: true })
 
             const derived = deriveAttemptState(events || [])
-            return { ...attempt, derivedState: derived.derivedState }
+            const taskTitle = attempt.task_id ? taskTitleMap.get(attempt.task_id) : null
+            const sequence = attemptSequenceMap.get(attempt.id)
+            const displayTitle = taskTitle
+                ? `${taskTitle} - Quest Attempt - #${sequence ?? 1}`
+                : `Attempt #${attempt.id.slice(0, 8)}`
+
+            return { ...attempt, derivedState: derived.derivedState, displayTitle }
         })
     )
 

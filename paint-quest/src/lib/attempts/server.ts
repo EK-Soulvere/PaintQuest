@@ -11,6 +11,8 @@ export interface AttemptDetails {
     events: ProgressEvent[]
     entries: AttemptEntry[]
     derived: ReturnType<typeof deriveAttemptState>
+    questTitle: string | null
+    attemptSequence: number | null
 }
 
 export async function getAttemptDetails(attemptId: string): Promise<AttemptDetails> {
@@ -54,11 +56,36 @@ export async function getAttemptDetails(attemptId: string): Promise<AttemptDetai
 
     const derived = deriveAttemptState(events || [])
 
+    let questTitle: string | null = null
+    let attemptSequence: number | null = null
+    if (attempt.task_id) {
+        const { data: task } = await supabase
+            .from('task')
+            .select('title')
+            .eq('id', attempt.task_id)
+            .maybeSingle()
+        questTitle = task?.title ?? null
+
+        const { data: relatedAttempts } = await supabase
+            .from('attempt')
+            .select('id,created_at')
+            .eq('task_id', attempt.task_id)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true })
+
+        if (relatedAttempts && relatedAttempts.length > 0) {
+            const idx = relatedAttempts.findIndex((row) => row.id === attempt.id)
+            attemptSequence = idx >= 0 ? idx + 1 : null
+        }
+    }
+
     return {
         attempt,
         events: events || [],
         entries: entries || [],
         derived,
+        questTitle,
+        attemptSequence,
     }
 }
 

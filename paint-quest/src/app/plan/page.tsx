@@ -25,10 +25,10 @@ export default async function PlanPage() {
             <div className="max-w-4xl mx-auto space-y-6">
                 <div>
                     <h1 className="text-4xl font-bold text-[var(--color-primary)] mb-2">
-                        Quick Start
+                        Quest Quick Start
                     </h1>
                     <p className="text-[var(--color-text)] opacity-70">
-                        Choose a time bucket and get 5 recommended tasks.
+                        Choose a time bucket and get 5 recommended quests.
                     </p>
                 </div>
                 <PlanPanel defaultMinutes={defaultBucket} showStartButtons />

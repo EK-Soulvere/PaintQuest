@@ -28,10 +28,10 @@ export default async function TasksPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-4xl font-bold text-[var(--color-primary)] mb-2">
-                            Tasks
+                            Quests
                         </h1>
                         <p className="text-[var(--color-text)] opacity-70">
-                            Build your backlog and start quests.
+                            Build your quest backlog. Each quest can have multiple attempts.
                         </p>
                     </div>
                 </div>

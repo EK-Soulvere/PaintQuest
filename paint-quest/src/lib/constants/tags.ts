@@ -52,3 +52,16 @@ export const PAINT_MEDIUM_TAGS = [
     'Glaze',
     'Texture',
 ] as const
+
+export const PROFILE_FOCUS_SKILLS = [
+    'Basing',
+    'Basecoating',
+    'Drybrushing',
+    'Glazing',
+    'Freehand',
+    'Layering',
+    'Slapchop',
+    'Underpainting',
+    'Washing',
+    'Wetblending',
+] as const

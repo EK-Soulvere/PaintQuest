@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import type { Database } from '@/lib/types/database.types'
+import TagMultiSelect from '@/components/TagMultiSelect'
+import { PROFILE_FOCUS_SKILLS } from '@/lib/constants/tags'
 
 type Profile = Database['public']['Tables']['profile']['Row']
 
@@ -24,15 +26,15 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
     const [media, setMedia] = useState(
         Array.isArray(initialProfile?.media) ? initialProfile?.media.join(', ') : ''
     )
-    const [focusTop, setFocusTop] = useState(
+    const [focusTop, setFocusTop] = useState<string[]>(
         Array.isArray(initialProfile?.focus_skills_top3)
-            ? initialProfile?.focus_skills_top3.join(', ')
-            : ''
+            ? initialProfile.focus_skills_top3.map(String)
+            : []
     )
-    const [focusBottom, setFocusBottom] = useState(
+    const [focusBottom, setFocusBottom] = useState<string[]>(
         Array.isArray(initialProfile?.focus_skills_bottom3)
-            ? initialProfile?.focus_skills_bottom3.join(', ')
-            : ''
+            ? initialProfile.focus_skills_bottom3.map(String)
+            : []
     )
     const [defaultTime, setDefaultTime] = useState(
         initialProfile?.default_time_bucket ?? 30
@@ -61,8 +63,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     media: parseList(media),
-                    focus_skills_top3: parseList(focusTop),
-                    focus_skills_bottom3: parseList(focusBottom),
+                    focus_skills_top3: focusTop.length > 0 ? focusTop : null,
+                    focus_skills_bottom3: focusBottom.length > 0 ? focusBottom : null,
                     default_time_bucket: defaultTime,
                     constraints: {
                         excluded_tools_tags: parseList(excludedTools),
@@ -115,28 +117,18 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
-                        Focus Skills (Top 3)
-                    </label>
-                    <input
-                        value={focusTop}
-                        onChange={(e) => setFocusTop(e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                        placeholder="blending, glaze, edge highlight"
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
-                        Focus Skills (Bottom 3)
-                    </label>
-                    <input
-                        value={focusBottom}
-                        onChange={(e) => setFocusBottom(e.target.value)}
-                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                        placeholder="airbrush, basing, freehand"
-                    />
-                </div>
+                <TagMultiSelect
+                    label="Focus Skills (Top 3)"
+                    options={PROFILE_FOCUS_SKILLS as unknown as string[]}
+                    value={focusTop}
+                    onChange={(next) => setFocusTop(next.slice(0, 3))}
+                />
+                <TagMultiSelect
+                    label="Focus Skills (Bottom 3)"
+                    options={PROFILE_FOCUS_SKILLS as unknown as string[]}
+                    value={focusBottom}
+                    onChange={(next) => setFocusBottom(next.slice(0, 3))}
+                />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
