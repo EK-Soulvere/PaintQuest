@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import TaskDetailEditor from './TaskDetailEditor'
 import StartQuestButton from './StartQuestButton'
+import AttemptTemplatesEditor from './AttemptTemplatesEditor'
 
 export default async function TaskDetailPage({
     params,
@@ -29,6 +30,13 @@ export default async function TaskDetailPage({
         notFound()
     }
 
+    const { data: templates } = await supabase
+        .from('quest_attempt_template')
+        .select('*')
+        .eq('task_id', task.id)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
     return (
         <div className="min-h-screen p-8">
             <div className="max-w-4xl mx-auto space-y-6">
@@ -45,6 +53,7 @@ export default async function TaskDetailPage({
                 </div>
 
                 <TaskDetailEditor task={task} />
+                <AttemptTemplatesEditor taskId={task.id} initialTemplates={templates || []} />
             </div>
         </div>
     )

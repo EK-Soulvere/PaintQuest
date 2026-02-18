@@ -239,6 +239,56 @@ export interface Database {
                     updated_at?: string
                 }
             }
+            quest_attempt_template: {
+                Row: {
+                    id: string
+                    user_id: string
+                    task_id: string | null
+                    title: string
+                    description: string | null
+                    estimated_minutes_min: number
+                    estimated_minutes_max: number
+                    energy: 'low' | 'med' | 'high'
+                    required_tools_tags: Json | null
+                    focus_skills_tags: Json | null
+                    progress_value: string | null
+                    is_system_generated: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    task_id?: string | null
+                    title: string
+                    description?: string | null
+                    estimated_minutes_min: number
+                    estimated_minutes_max: number
+                    energy: 'low' | 'med' | 'high'
+                    required_tools_tags?: Json | null
+                    focus_skills_tags?: Json | null
+                    progress_value?: string | null
+                    is_system_generated?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    task_id?: string | null
+                    title?: string
+                    description?: string | null
+                    estimated_minutes_min?: number
+                    estimated_minutes_max?: number
+                    energy?: 'low' | 'med' | 'high'
+                    required_tools_tags?: Json | null
+                    focus_skills_tags?: Json | null
+                    progress_value?: string | null
+                    is_system_generated?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
         }
     }
 }

@@ -77,6 +77,15 @@ export function buildOpenApiSpec(baseUrl: string) {
                         available: { type: 'boolean' },
                     },
                 },
+                AttemptRecommendationResponse: {
+                    type: 'object',
+                    properties: {
+                        recommendations: {
+                            type: 'array',
+                            items: { type: 'object' },
+                        },
+                    },
+                },
             },
         },
         paths: {
@@ -271,6 +280,143 @@ export function buildOpenApiSpec(baseUrl: string) {
                     responses: {
                         '200': { description: 'Quest attempt created' },
                         '409': { description: 'Another attempt is already in progress' },
+                    },
+                },
+            },
+            '/api/quests/{taskId}/attempt-recommendations': {
+                get: {
+                    tags: ['Quests'],
+                    summary: 'Get suggested attempts for a quest',
+                    parameters: [
+                        {
+                            in: 'path',
+                            name: 'taskId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                        {
+                            in: 'query',
+                            name: 'minutes',
+                            required: false,
+                            schema: { type: 'integer', minimum: 1 },
+                        },
+                        {
+                            in: 'query',
+                            name: 'energy',
+                            required: false,
+                            schema: { type: 'string', enum: ['low', 'med', 'high'] },
+                        },
+                    ],
+                    responses: {
+                        '200': {
+                            description: 'Suggested attempts returned',
+                            content: {
+                                'application/json': {
+                                    schema: { $ref: '#/components/schemas/AttemptRecommendationResponse' },
+                                },
+                            },
+                        },
+                        '401': { description: 'Not authenticated' },
+                        '404': { description: 'Quest not found' },
+                    },
+                },
+            },
+            '/api/quests/{taskId}/attempt-templates': {
+                get: {
+                    tags: ['Quests'],
+                    summary: 'List attempt templates for a quest',
+                    parameters: [
+                        {
+                            in: 'path',
+                            name: 'taskId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                    ],
+                    responses: {
+                        '200': { description: 'Templates loaded' },
+                        '401': { description: 'Not authenticated' },
+                    },
+                },
+                post: {
+                    tags: ['Quests'],
+                    summary: 'Create attempt template for a quest',
+                    parameters: [
+                        {
+                            in: 'path',
+                            name: 'taskId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                    ],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: { type: 'object' },
+                            },
+                        },
+                    },
+                    responses: {
+                        '200': { description: 'Template created' },
+                        '401': { description: 'Not authenticated' },
+                        '400': { description: 'Validation error' },
+                    },
+                },
+            },
+            '/api/quests/{taskId}/attempt-templates/{templateId}': {
+                patch: {
+                    tags: ['Quests'],
+                    summary: 'Update attempt template',
+                    parameters: [
+                        {
+                            in: 'path',
+                            name: 'taskId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                        {
+                            in: 'path',
+                            name: 'templateId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                    ],
+                    requestBody: {
+                        required: true,
+                        content: {
+                            'application/json': {
+                                schema: { type: 'object' },
+                            },
+                        },
+                    },
+                    responses: {
+                        '200': { description: 'Template updated' },
+                        '401': { description: 'Not authenticated' },
+                        '400': { description: 'Validation error' },
+                    },
+                },
+                delete: {
+                    tags: ['Quests'],
+                    summary: 'Delete attempt template',
+                    parameters: [
+                        {
+                            in: 'path',
+                            name: 'taskId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                        {
+                            in: 'path',
+                            name: 'templateId',
+                            required: true,
+                            schema: { type: 'string', format: 'uuid' },
+                        },
+                    ],
+                    responses: {
+                        '200': { description: 'Template deleted' },
+                        '401': { description: 'Not authenticated' },
+                        '400': { description: 'Validation error' },
                     },
                 },
             },

@@ -1,0 +1,84 @@
+import type { Database } from '@/lib/types/database.types'
+
+type InsertTemplate = Database['public']['Tables']['quest_attempt_template']['Insert']
+
+export function buildDefaultQuestAttemptTemplates(params: {
+    userId: string
+    taskId: string
+    questTitle: string
+}): InsertTemplate[] {
+    const { userId, taskId, questTitle } = params
+
+    const questSpecific: InsertTemplate[] = [
+        {
+            user_id: userId,
+            task_id: taskId,
+            title: `${questTitle}: Prep + Basecoat pass`,
+            description: 'Block in base colors for the next chunk of models.',
+            estimated_minutes_min: 25,
+            estimated_minutes_max: 45,
+            energy: 'low',
+            required_tools_tags: ['round brush'],
+            focus_skills_tags: ['basecoating'],
+            progress_value: 'Base layers complete on 2-3 models',
+            is_system_generated: true,
+        },
+        {
+            user_id: userId,
+            task_id: taskId,
+            title: `${questTitle}: Shade + Cleanup`,
+            description: 'Apply washes and cleanup transitions on key panels.',
+            estimated_minutes_min: 30,
+            estimated_minutes_max: 60,
+            energy: 'med',
+            required_tools_tags: ['round brush', 'detail brush'],
+            focus_skills_tags: ['washing', 'layering'],
+            progress_value: 'Shadows and cleanup done for one unit section',
+            is_system_generated: true,
+        },
+        {
+            user_id: userId,
+            task_id: taskId,
+            title: `${questTitle}: Highlight push`,
+            description: 'Edge highlight focal details to push finish quality.',
+            estimated_minutes_min: 30,
+            estimated_minutes_max: 75,
+            energy: 'high',
+            required_tools_tags: ['highlight brush', 'detail brush'],
+            focus_skills_tags: ['highlighting', 'blending'],
+            progress_value: 'Visible finish upgrade on key models',
+            is_system_generated: true,
+        },
+    ]
+
+    const genericSkillTemplates: InsertTemplate[] = [
+        {
+            user_id: userId,
+            task_id: null,
+            title: '5 model highlighting practice',
+            description: 'Practice controlled highlights on five small areas.',
+            estimated_minutes_min: 20,
+            estimated_minutes_max: 45,
+            energy: 'med',
+            required_tools_tags: ['highlight brush'],
+            focus_skills_tags: ['highlighting'],
+            progress_value: 'Improved highlight consistency',
+            is_system_generated: true,
+        },
+        {
+            user_id: userId,
+            task_id: null,
+            title: 'Layering transition drill',
+            description: 'Build smooth transitions on armor panels.',
+            estimated_minutes_min: 25,
+            estimated_minutes_max: 50,
+            energy: 'med',
+            required_tools_tags: ['round brush'],
+            focus_skills_tags: ['layering', 'glazing'],
+            progress_value: 'Smoother transitions across test area',
+            is_system_generated: true,
+        },
+    ]
+
+    return [...questSpecific, ...genericSkillTemplates]
+}

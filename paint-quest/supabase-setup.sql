@@ -90,6 +90,24 @@ CREATE TABLE IF NOT EXISTS arsenal_item (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Create quest_attempt_template table
+CREATE TABLE IF NOT EXISTS quest_attempt_template (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  task_id UUID REFERENCES task(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  estimated_minutes_min INT NOT NULL,
+  estimated_minutes_max INT NOT NULL,
+  energy TEXT NOT NULL CHECK (energy IN ('low', 'med', 'high')),
+  required_tools_tags JSONB,
+  focus_skills_tags JSONB,
+  progress_value TEXT,
+  is_system_generated BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_attempt_user_id ON attempt(user_id);
 CREATE INDEX IF NOT EXISTS idx_attempt_created_at ON attempt(created_at DESC);
@@ -106,6 +124,9 @@ CREATE INDEX IF NOT EXISTS idx_profile_user_id ON profile(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profile_user_id_unique ON profile(user_id);
 CREATE INDEX IF NOT EXISTS idx_arsenal_item_user_id ON arsenal_item(user_id);
 CREATE INDEX IF NOT EXISTS idx_arsenal_item_available ON arsenal_item(available);
+CREATE INDEX IF NOT EXISTS idx_quest_attempt_template_user_id ON quest_attempt_template(user_id);
+CREATE INDEX IF NOT EXISTS idx_quest_attempt_template_task_id ON quest_attempt_template(task_id);
+CREATE INDEX IF NOT EXISTS idx_quest_attempt_template_energy ON quest_attempt_template(energy);
 
 -- Enable Row Level Security
 ALTER TABLE attempt ENABLE ROW LEVEL SECURITY;
@@ -115,6 +136,7 @@ ALTER TABLE task ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendation_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profile ENABLE ROW LEVEL SECURITY;
 ALTER TABLE arsenal_item ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quest_attempt_template ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for attempt table
 -- Users can only see their own attempts
@@ -339,5 +361,27 @@ CREATE POLICY "Users can update own arsenal items"
 
 CREATE POLICY "Users can delete own arsenal items"
   ON arsenal_item
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- RLS Policies for quest_attempt_template table
+CREATE POLICY "Users can view own quest attempt templates"
+  ON quest_attempt_template
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own quest attempt templates"
+  ON quest_attempt_template
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own quest attempt templates"
+  ON quest_attempt_template
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own quest attempt templates"
+  ON quest_attempt_template
   FOR DELETE
   USING (auth.uid() = user_id);

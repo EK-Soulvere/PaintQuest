@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import QuestActions from './QuestActions'
 import Link from 'next/link'
 import StartAttemptButton from './StartAttemptButton'
+import SuggestedAttempts from './SuggestedAttempts'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function AttemptDetailPage({
     params,
@@ -16,6 +18,16 @@ export default async function AttemptDetailPage({
     } catch {
         notFound()
     }
+
+    const supabase = await createClient()
+    const { data: profile } = await supabase
+        .from('profile')
+        .select('default_time_bucket,energy_preference')
+        .maybeSingle()
+
+    const defaultMinutes = profile?.default_time_bucket ?? 60
+    const defaultEnergy =
+        (profile?.energy_preference as 'low' | 'med' | 'high' | null) ?? 'med'
 
     return (
         <div className="min-h-screen p-8">
@@ -49,6 +61,19 @@ export default async function AttemptDetailPage({
                             <StartAttemptButton attemptId={details.attempt.id} />
                         </div>
                     ) : null}
+                </div>
+
+                <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
+                    <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
+                        Suggested Attempts
+                    </h2>
+                    <SuggestedAttempts
+                        attemptId={details.attempt.id}
+                        taskId={details.attempt.task_id}
+                        canRecordProgress={details.derived.allowedActions.includes('PROGRESS_RECORDED')}
+                        defaultMinutes={defaultMinutes}
+                        defaultEnergy={defaultEnergy}
+                    />
                 </div>
 
                 <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
