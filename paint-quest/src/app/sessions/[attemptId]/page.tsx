@@ -78,8 +78,11 @@ export default async function AttemptDetailPage({
 
                 <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
                     <h2 className="text-xl font-semibold text-[var(--color-secondary)] mb-4">
-                        Quest Actions
+                        Quest Attempts
                     </h2>
+                    <p className="text-sm text-[var(--color-text)] opacity-70 mb-4">
+                        Log custom attempt progress: record what you worked on and how many minutes it took.
+                    </p>
                     <QuestActions
                         attemptId={details.attempt.id}
                         allowedActions={details.derived.allowedActions}

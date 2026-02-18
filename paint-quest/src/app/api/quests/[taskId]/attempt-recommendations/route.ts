@@ -41,6 +41,34 @@ export async function GET(
 
         const energy = requestedEnergy || (profile?.energy_preference as 'low' | 'med' | 'high' | null) || 'med'
 
+        const { data: attempts } = await supabase
+            .from('attempt')
+            .select('id')
+            .eq('task_id', taskId)
+            .eq('user_id', user.id)
+
+        const attemptIds = (attempts || []).map((a) => a.id)
+        let usedTemplateIds: string[] = []
+        let recentTemplateIds: string[] = []
+        if (attemptIds.length > 0) {
+            const { data: allProgressEvents } = await supabase
+                .from('progress_event')
+                .select('payload,timestamp')
+                .eq('event_type', 'PROGRESS_RECORDED')
+                .in('attempt_id', attemptIds)
+                .order('timestamp', { ascending: false })
+
+            usedTemplateIds = (allProgressEvents || [])
+                .map((event) => {
+                    if (!event.payload || typeof event.payload !== 'object') return null
+                    const payload = event.payload as { template_id?: string }
+                    return payload.template_id || null
+                })
+                .filter((id): id is string => Boolean(id))
+            recentTemplateIds = usedTemplateIds.slice(0, 20)
+        }
+        const usedTemplateSet = new Set(usedTemplateIds)
+
         const { data: existingTaskTemplates } = await supabase
             .from('quest_attempt_template')
             .select('*')
@@ -48,7 +76,10 @@ export async function GET(
             .eq('task_id', taskId)
 
         const taskTemplates = existingTaskTemplates || []
-        if (taskTemplates.length < 3) {
+        const availableTaskTemplateCount = taskTemplates.filter(
+            (template) => !usedTemplateSet.has(template.id)
+        ).length
+        if (availableTaskTemplateCount < 3) {
             const questDefaults = buildQuestSpecificAttemptTemplates({
                 userId: user.id,
                 taskId,
@@ -57,7 +88,7 @@ export async function GET(
             const existingTitles = new Set(taskTemplates.map((template) => template.title))
             const toInsert = questDefaults
                 .filter((template) => !existingTitles.has(template.title))
-                .slice(0, 3 - taskTemplates.length)
+                .slice(0, 3 - availableTaskTemplateCount)
 
             if (toInsert.length > 0) {
                 await supabase.from('quest_attempt_template').insert(toInsert)
@@ -87,6 +118,10 @@ export async function GET(
             templates = reload.data || []
         }
 
+        const unplayedTemplates = (templates || []).filter(
+            (template) => !usedTemplateSet.has(template.id)
+        )
+
         const { data: arsenal } = await supabase
             .from('arsenal_item')
             .select('tags')
@@ -95,38 +130,12 @@ export async function GET(
         const availableToolTags = (arsenal || [])
             .flatMap((item) => (Array.isArray(item.tags) ? item.tags.map(String) : []))
 
-        const { data: attempts } = await supabase
-            .from('attempt')
-            .select('id')
-            .eq('task_id', taskId)
-            .eq('user_id', user.id)
-
-        const attemptIds = (attempts || []).map((a) => a.id)
-        let recentTemplateIds: string[] = []
-        if (attemptIds.length > 0) {
-            const { data: recentEvents } = await supabase
-                .from('progress_event')
-                .select('payload,timestamp')
-                .eq('event_type', 'PROGRESS_RECORDED')
-                .in('attempt_id', attemptIds)
-                .order('timestamp', { ascending: false })
-                .limit(20)
-
-            recentTemplateIds = (recentEvents || [])
-                .map((event) => {
-                    if (!event.payload || typeof event.payload !== 'object') return null
-                    const payload = event.payload as { template_id?: string }
-                    return payload.template_id || null
-                })
-                .filter((id): id is string => Boolean(id))
-        }
-
         const bottomSkills = Array.isArray(profile?.focus_skills_bottom3)
             ? profile.focus_skills_bottom3.map(String)
             : []
 
         const recommendations = recommendAttempts({
-            templates: templates || [],
+            templates: unplayedTemplates,
             availableMinutes,
             energy,
             bottomSkills,
@@ -140,7 +149,7 @@ export async function GET(
                 questId: taskId,
                 availableMinutes,
                 energy,
-                templateCount: (templates || []).length,
+                templateCount: unplayedTemplates.length,
             },
         })
     } catch (error) {

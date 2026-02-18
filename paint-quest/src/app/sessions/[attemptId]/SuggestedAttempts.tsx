@@ -92,6 +92,9 @@ export default function SuggestedAttempts({
             if (!response.ok) {
                 throw new Error(data?.error || 'Failed to start suggested attempt')
             }
+            setSuggestions((prev) =>
+                prev.filter((item) => item.template.id !== suggestion.template.id)
+            )
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unknown error')
