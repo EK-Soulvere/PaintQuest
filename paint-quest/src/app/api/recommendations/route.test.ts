@@ -27,6 +27,7 @@ function makeSupabaseStub() {
                         data: [
                             {
                                 id: 'task-1',
+                                title: 'Quest 1',
                                 estimated_minutes_min: 30,
                                 estimated_minutes_max: 60,
                                 required_tools_tags: [],
@@ -35,6 +36,22 @@ function makeSupabaseStub() {
                             },
                         ],
                         error: null,
+                    }),
+                    insert: vi.fn().mockReturnValue({
+                        select: vi.fn().mockResolvedValue({
+                            data: [
+                                {
+                                    id: 'task-2',
+                                    title: 'Starter quest',
+                                    estimated_minutes_min: 30,
+                                    estimated_minutes_max: 60,
+                                    required_tools_tags: [],
+                                    skills_tags: [],
+                                    priority: 3,
+                                },
+                            ],
+                            error: null,
+                        }),
                     }),
                 }
             }

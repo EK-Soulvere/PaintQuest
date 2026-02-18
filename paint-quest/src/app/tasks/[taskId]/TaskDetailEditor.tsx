@@ -174,10 +174,10 @@ export default function TaskDetailEditor({ task }: TaskDetailEditorProps) {
                     {saving ? 'Saving...' : 'Save changes'}
                 </button>
                 <button
-                    onClick={() => router.push('/tasks')}
+                    onClick={() => router.push('/quests')}
                     className="text-sm text-[var(--color-secondary)] hover:underline"
                 >
-                    Back to Tasks
+                    Back to Quests
                 </button>
             </div>
         </div>

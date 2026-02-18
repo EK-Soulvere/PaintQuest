@@ -39,6 +39,7 @@ export default function SuggestedAttempts({
     const [minutes, setMinutes] = useState(defaultMinutes)
     const [energy, setEnergy] = useState<'low' | 'med' | 'high'>(defaultEnergy)
     const [loading, setLoading] = useState(false)
+    const [startingTemplateId, setStartingTemplateId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [suggestions, setSuggestions] = useState<SuggestedAttempt[]>([])
     const router = useRouter()
@@ -69,6 +70,8 @@ export default function SuggestedAttempts({
     }, [taskId])
 
     const startSuggestedAttempt = async (suggestion: SuggestedAttempt) => {
+        if (startingTemplateId) return
+        setStartingTemplateId(suggestion.template.id)
         try {
             const response = await fetch(`/api/attempts/${attemptId}/events`, {
                 method: 'POST',
@@ -92,6 +95,8 @@ export default function SuggestedAttempts({
             router.refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unknown error')
+        } finally {
+            setStartingTemplateId(null)
         }
     }
 
@@ -169,16 +174,18 @@ export default function SuggestedAttempts({
                                     </h3>
                                     <p className="text-xs text-[var(--color-text)] opacity-60">
                                         {suggestion.template.estimated_minutes_min}-
-                                        {suggestion.template.estimated_minutes_max} min •{' '}
+                                        {suggestion.template.estimated_minutes_max} min |{' '}
                                         {suggestion.template.energy} energy
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => startSuggestedAttempt(suggestion)}
-                                    disabled={!canRecordProgress}
+                                    disabled={!canRecordProgress || Boolean(startingTemplateId)}
                                     className="px-3 py-1 text-sm border border-[var(--color-border)] rounded-md text-[var(--color-text)] hover:bg-[var(--color-surface)] disabled:opacity-50"
                                 >
-                                    Start This Attempt
+                                    {startingTemplateId === suggestion.template.id
+                                        ? 'Starting...'
+                                        : 'Start This Attempt'}
                                 </button>
                             </div>
                             {suggestion.template.progress_value ? (

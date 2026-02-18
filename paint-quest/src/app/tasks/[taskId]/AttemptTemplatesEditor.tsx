@@ -105,66 +105,86 @@ export default function AttemptTemplatesEditor({
             <div className="p-4 border border-[var(--color-border)] rounded-lg space-y-3">
                 <h3 className="text-lg font-semibold text-[var(--color-secondary)]">New Template</h3>
                 <div className="grid md:grid-cols-2 gap-3">
-                    <input
-                        value={newDraft.title}
-                        onChange={(e) => setNewDraft((d) => ({ ...d, title: e.target.value }))}
-                        className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                        placeholder="Title"
-                    />
-                    <input
-                        value={newDraft.progress_value}
-                        onChange={(e) => setNewDraft((d) => ({ ...d, progress_value: e.target.value }))}
-                        className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                        placeholder="Progress promise"
+                    <div>
+                        <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Title</label>
+                        <input
+                            value={newDraft.title}
+                            onChange={(e) => setNewDraft((d) => ({ ...d, title: e.target.value }))}
+                            className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                            placeholder="Template title"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                            Progress Promise
+                        </label>
+                        <input
+                            value={newDraft.progress_value}
+                            onChange={(e) => setNewDraft((d) => ({ ...d, progress_value: e.target.value }))}
+                            className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                            placeholder="What progress this attempt creates"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Description</label>
+                    <textarea
+                        value={newDraft.description}
+                        onChange={(e) => setNewDraft((d) => ({ ...d, description: e.target.value }))}
+                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                        placeholder="Template description"
                     />
                 </div>
-                <textarea
-                    value={newDraft.description}
-                    onChange={(e) => setNewDraft((d) => ({ ...d, description: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                    placeholder="Description"
-                />
                 <div className="grid md:grid-cols-3 gap-3">
-                    <input
-                        type="number"
-                        value={newDraft.estimated_minutes_min}
-                        onChange={(e) =>
-                            setNewDraft((d) => ({
-                                ...d,
-                                estimated_minutes_min: Number(e.target.value),
-                            }))
-                        }
-                        className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                        placeholder="Min minutes"
-                    />
-                    <input
-                        type="number"
-                        value={newDraft.estimated_minutes_max}
-                        onChange={(e) =>
-                            setNewDraft((d) => ({
-                                ...d,
-                                estimated_minutes_max: Number(e.target.value),
-                            }))
-                        }
-                        className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                        placeholder="Max minutes"
-                    />
-                    <select
-                        value={newDraft.energy}
-                        onChange={(e) =>
-                            setNewDraft((d) => ({
-                                ...d,
-                                energy: e.target.value as 'low' | 'med' | 'high',
-                            }))
-                        }
-                        className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                    >
-                        {energyOptions.map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
+                    <div>
+                        <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Min Minutes</label>
+                        <input
+                            type="number"
+                            value={newDraft.estimated_minutes_min}
+                            onChange={(e) =>
+                                setNewDraft((d) => ({
+                                    ...d,
+                                    estimated_minutes_min: Number(e.target.value),
+                                }))
+                            }
+                            className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                            placeholder="Min minutes"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Max Minutes</label>
+                        <input
+                            type="number"
+                            value={newDraft.estimated_minutes_max}
+                            onChange={(e) =>
+                                setNewDraft((d) => ({
+                                    ...d,
+                                    estimated_minutes_max: Number(e.target.value),
+                                }))
+                            }
+                            className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                            placeholder="Max minutes"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Energy</label>
+                        <select
+                            value={newDraft.energy}
+                            onChange={(e) =>
+                                setNewDraft((d) => ({
+                                    ...d,
+                                    energy: e.target.value as 'low' | 'med' | 'high',
+                                }))
+                            }
+                            className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                        >
+                            {energyOptions.map((option) => (
+                                <option key={option} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                     <TagMultiSelect
@@ -265,59 +285,79 @@ function EditableTemplateCard(props: {
     return (
         <div className="p-4 border border-[var(--color-border)] rounded-lg space-y-3">
             <div className="grid md:grid-cols-2 gap-3">
-                <input
-                    value={draft.title}
-                    onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                />
-                <input
-                    value={draft.progress_value || ''}
+                <div>
+                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Title</label>
+                    <input
+                        value={draft.title}
+                        onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">
+                        Progress Promise
+                    </label>
+                    <input
+                        value={draft.progress_value || ''}
+                        onChange={(e) =>
+                            setDraft((d) => ({ ...d, progress_value: e.target.value || null }))
+                        }
+                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                    />
+                </div>
+            </div>
+            <div>
+                <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Description</label>
+                <textarea
+                    value={draft.description || ''}
                     onChange={(e) =>
-                        setDraft((d) => ({ ...d, progress_value: e.target.value || null }))
+                        setDraft((d) => ({ ...d, description: e.target.value || null }))
                     }
-                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                    className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
                 />
             </div>
-            <textarea
-                value={draft.description || ''}
-                onChange={(e) =>
-                    setDraft((d) => ({ ...d, description: e.target.value || null }))
-                }
-                className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-            />
             <div className="grid md:grid-cols-3 gap-3">
-                <input
-                    type="number"
-                    value={draft.estimated_minutes_min}
-                    onChange={(e) =>
-                        setDraft((d) => ({ ...d, estimated_minutes_min: Number(e.target.value) }))
-                    }
-                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                />
-                <input
-                    type="number"
-                    value={draft.estimated_minutes_max}
-                    onChange={(e) =>
-                        setDraft((d) => ({ ...d, estimated_minutes_max: Number(e.target.value) }))
-                    }
-                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                />
-                <select
-                    value={draft.energy}
-                    onChange={(e) =>
-                        setDraft((d) => ({
-                            ...d,
-                            energy: e.target.value as 'low' | 'med' | 'high',
-                        }))
-                    }
-                    className="px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
-                >
-                    {energyOptions.map((option) => (
-                        <option key={option} value={option}>
-                            {option}
-                        </option>
-                    ))}
-                </select>
+                <div>
+                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Min Minutes</label>
+                    <input
+                        type="number"
+                        value={draft.estimated_minutes_min}
+                        onChange={(e) =>
+                            setDraft((d) => ({ ...d, estimated_minutes_min: Number(e.target.value) }))
+                        }
+                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Max Minutes</label>
+                    <input
+                        type="number"
+                        value={draft.estimated_minutes_max}
+                        onChange={(e) =>
+                            setDraft((d) => ({ ...d, estimated_minutes_max: Number(e.target.value) }))
+                        }
+                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs text-[var(--color-text)] opacity-70 mb-1">Energy</label>
+                    <select
+                        value={draft.energy}
+                        onChange={(e) =>
+                            setDraft((d) => ({
+                                ...d,
+                                energy: e.target.value as 'low' | 'med' | 'high',
+                            }))
+                        }
+                        className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md"
+                    >
+                        {energyOptions.map((option) => (
+                            <option key={option} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
             <div className="grid md:grid-cols-2 gap-3">
                 <TagMultiSelect

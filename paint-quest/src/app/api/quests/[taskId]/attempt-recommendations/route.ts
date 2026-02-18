@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { buildDefaultQuestAttemptTemplates } from '@/lib/attempts/defaultTemplates'
+import {
+    buildDefaultQuestAttemptTemplates,
+    buildQuestSpecificAttemptTemplates,
+} from '@/lib/attempts/defaultTemplates'
 import { recommendAttempts } from '@/lib/recommend/recommendAttempts'
 
 export async function GET(
@@ -37,6 +40,29 @@ export async function GET(
             .maybeSingle()
 
         const energy = requestedEnergy || (profile?.energy_preference as 'low' | 'med' | 'high' | null) || 'med'
+
+        const { data: existingTaskTemplates } = await supabase
+            .from('quest_attempt_template')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('task_id', taskId)
+
+        const taskTemplates = existingTaskTemplates || []
+        if (taskTemplates.length < 3) {
+            const questDefaults = buildQuestSpecificAttemptTemplates({
+                userId: user.id,
+                taskId,
+                questTitle: task.title,
+            })
+            const existingTitles = new Set(taskTemplates.map((template) => template.title))
+            const toInsert = questDefaults
+                .filter((template) => !existingTitles.has(template.title))
+                .slice(0, 3 - taskTemplates.length)
+
+            if (toInsert.length > 0) {
+                await supabase.from('quest_attempt_template').insert(toInsert)
+            }
+        }
 
         let { data: templates } = await supabase
             .from('quest_attempt_template')

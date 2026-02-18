@@ -37,30 +37,31 @@ function makeSupabaseStub() {
                 }
             }
             if (table === 'quest_attempt_template') {
+                const templates = [
+                    {
+                        id: 'tpl-1',
+                        user_id: 'user-1',
+                        task_id: 'task-1',
+                        title: 'Attempt',
+                        description: null,
+                        estimated_minutes_min: 20,
+                        estimated_minutes_max: 45,
+                        energy: 'med',
+                        required_tools_tags: [],
+                        focus_skills_tags: [],
+                        progress_value: null,
+                        is_system_generated: true,
+                        created_at: '2026-02-18T00:00:00Z',
+                        updated_at: '2026-02-18T00:00:00Z',
+                    },
+                ]
+                const chainedQuery = {
+                    eq: vi.fn().mockResolvedValue({ data: templates, error: null }),
+                    or: vi.fn().mockResolvedValue({ data: templates, error: null }),
+                }
                 return {
                     select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    or: vi.fn().mockResolvedValue({
-                        data: [
-                            {
-                                id: 'tpl-1',
-                                user_id: 'user-1',
-                                task_id: 'task-1',
-                                title: 'Attempt',
-                                description: null,
-                                estimated_minutes_min: 20,
-                                estimated_minutes_max: 45,
-                                energy: 'med',
-                                required_tools_tags: [],
-                                focus_skills_tags: [],
-                                progress_value: null,
-                                is_system_generated: true,
-                                created_at: '2026-02-18T00:00:00Z',
-                                updated_at: '2026-02-18T00:00:00Z',
-                            },
-                        ],
-                        error: null,
-                    }),
+                    eq: vi.fn().mockReturnValue(chainedQuery),
                     insert: vi.fn().mockResolvedValue({}),
                 }
             }

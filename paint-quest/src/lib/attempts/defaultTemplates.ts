@@ -2,7 +2,7 @@ import type { Database } from '@/lib/types/database.types'
 
 type InsertTemplate = Database['public']['Tables']['quest_attempt_template']['Insert']
 
-export function buildDefaultQuestAttemptTemplates(params: {
+export function buildQuestSpecificAttemptTemplates(params: {
     userId: string
     taskId: string
     questTitle: string
@@ -51,7 +51,12 @@ export function buildDefaultQuestAttemptTemplates(params: {
         },
     ]
 
-    const genericSkillTemplates: InsertTemplate[] = [
+    return questSpecific
+}
+
+function buildGenericSkillTemplates(params: { userId: string }): InsertTemplate[] {
+    const { userId } = params
+    return [
         {
             user_id: userId,
             task_id: null,
@@ -79,6 +84,15 @@ export function buildDefaultQuestAttemptTemplates(params: {
             is_system_generated: true,
         },
     ]
+}
 
-    return [...questSpecific, ...genericSkillTemplates]
+export function buildDefaultQuestAttemptTemplates(params: {
+    userId: string
+    taskId: string
+    questTitle: string
+}): InsertTemplate[] {
+    return [
+        ...buildQuestSpecificAttemptTemplates(params),
+        ...buildGenericSkillTemplates({ userId: params.userId }),
+    ]
 }

@@ -155,7 +155,7 @@ export default function PlanPanel({ defaultMinutes = 30, showStartButtons = true
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <button
-                                        onClick={() => router.push(`/tasks/${rec.task.id}`)}
+                                        onClick={() => router.push(`/quests/${rec.task.id}`)}
                                         className="text-sm text-[var(--color-secondary)] hover:underline"
                                     >
                                         Open

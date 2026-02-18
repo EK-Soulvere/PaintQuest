@@ -73,7 +73,7 @@ export default async function Home() {
                 Go to Sessions
               </Link>
               <Link
-                href="/tasks"
+                href="/quests"
                 className="inline-block px-6 py-3 border border-[var(--color-border)] text-[var(--color-text)] font-semibold rounded-md hover:bg-[var(--color-surface)] transition-colors"
               >
                 Manage Quests

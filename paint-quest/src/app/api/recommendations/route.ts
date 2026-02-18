@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { recommendTasks } from '@/lib/recommend/recommendTasks'
+import { DEFAULT_TASKS } from '@/lib/tasks/defaultTasks'
 
 export async function GET(request: Request) {
     try {
@@ -50,8 +51,48 @@ export async function GET(request: Request) {
             .select('*')
             .eq('available', true)
 
+        let tasksList = tasks || []
+        if (tasksList.length < 5) {
+            const existingTitles = new Set(tasksList.map((task) => task.title.toLowerCase()))
+            const inserts: Array<Record<string, unknown>> = []
+            let generatedIndex = 1
+
+            for (const starter of DEFAULT_TASKS) {
+                if (tasksList.length + inserts.length >= 5) break
+                const title = starter.title
+                if (existingTitles.has(title.toLowerCase())) continue
+                inserts.push({
+                    ...starter,
+                    user_id: user.id,
+                })
+                existingTitles.add(title.toLowerCase())
+            }
+
+            while (tasksList.length + inserts.length < 5) {
+                const base = DEFAULT_TASKS[(generatedIndex - 1) % DEFAULT_TASKS.length]
+                const title = `${base.title} ${generatedIndex + 1}`
+                if (!existingTitles.has(title.toLowerCase())) {
+                    inserts.push({
+                        ...base,
+                        title,
+                        user_id: user.id,
+                    })
+                    existingTitles.add(title.toLowerCase())
+                }
+                generatedIndex += 1
+            }
+
+            if (inserts.length > 0) {
+                const { data: created } = await supabase
+                    .from('task')
+                    .insert(inserts)
+                    .select('*')
+                tasksList = [...tasksList, ...(created || [])]
+            }
+        }
+
         const recommendations = recommendTasks({
-            tasks: tasks || [],
+            tasks: tasksList,
             attempts: attempts || [],
             availableMinutes,
             config,
@@ -59,7 +100,6 @@ export async function GET(request: Request) {
             arsenal: arsenal || [],
         })
 
-        const tasksList = tasks || []
         const missingTimeRange = tasksList.filter(
             (task) => task.estimated_minutes_min == null || task.estimated_minutes_max == null
         ).length

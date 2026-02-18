@@ -38,7 +38,7 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    title: 'New task',
+                    title: 'New quest',
                     priority: 3,
                     status: 'backlog',
                 }),
@@ -50,7 +50,6 @@ export default function TasksList({ initialTasks }: TasksListProps) {
             }
 
             setTasks([data.task, ...tasks])
-            router.refresh()
         } catch (error) {
             console.error(error)
             alert('Failed to create task')
@@ -84,9 +83,7 @@ export default function TasksList({ initialTasks }: TasksListProps) {
 
     const handleFieldBlur = async (taskId: string, field: keyof Task, value: Task[keyof Task]) => {
         try {
-            const updated = await updateTask(taskId, { [field]: value } as Partial<Task>)
-            setTasks((prev) => prev.map((task) => (task.id === taskId ? updated : task)))
-            router.refresh()
+            await updateTask(taskId, { [field]: value } as Partial<Task>)
         } catch (error) {
             console.error(error)
             alert('Failed to update task')
@@ -103,7 +100,6 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                 throw new Error(data?.error || 'Failed to archive task')
             }
             setTasks((prev) => prev.map((task) => (task.id === taskId ? data.task : task)))
-            router.refresh()
         } catch (error) {
             console.error(error)
             alert('Failed to archive task')
@@ -119,7 +115,6 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                 throw new Error(data?.error || 'Failed to seed tasks')
             }
             setTasks(data.tasks || [])
-            router.refresh()
         } catch (error) {
             console.error(error)
             alert('Failed to seed tasks')
@@ -135,13 +130,13 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                 disabled={creating}
                 className="px-6 py-3 bg-[var(--color-primary)] text-[var(--color-bg)] font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-                {creating ? 'Creating...' : '+ New Task'}
+                {creating ? 'Creating...' : '+ New Quest'}
             </button>
 
             {tasks.length === 0 ? (
                 <div className="text-center py-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg">
                     <p className="text-[var(--color-text)] opacity-70">
-                        No tasks yet. Create your first one!
+                        No quests yet. Create your first one!
                     </p>
                     <div className="mt-4 flex flex-col md:flex-row gap-3 justify-center">
                         <button
@@ -149,14 +144,14 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                             disabled={seeding}
                             className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-bg)] font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
                         >
-                            {seeding ? 'Generating...' : 'Generate 5 Starter Tasks'}
+                            {seeding ? 'Generating...' : 'Generate 5 Starter Quests'}
                         </button>
                         <button
                             onClick={createEmptyTask}
                             disabled={creating}
                             className="px-4 py-2 border border-[var(--color-border)] text-[var(--color-text)] font-semibold rounded-md hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
                         >
-                            {creating ? 'Creating...' : 'Create Empty Task'}
+                            {creating ? 'Creating...' : 'Create Empty Quest'}
                         </button>
                     </div>
                 </div>
@@ -164,8 +159,8 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                 <div className="space-y-6">
                     {tasks.length > 0 ? (
                         <div className="p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-xs text-[var(--color-text)] opacity-80">
-                            <p className="font-medium text-[var(--color-secondary)] mb-2">
-                                Task Health
+                        <p className="font-medium text-[var(--color-secondary)] mb-2">
+                                Quest Health
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <span>
@@ -367,10 +362,10 @@ export default function TasksList({ initialTasks }: TasksListProps) {
                                     Archive
                                 </button>
                                 <button
-                                    onClick={() => router.push(`/tasks/${task.id}`)}
+                                    onClick={() => router.push(`/quests/${task.id}`)}
                                     className="text-sm text-[var(--color-secondary)] hover:underline"
                                 >
-                                    Open task
+                                    Open quest
                                 </button>
                             </div>
                         </div>
